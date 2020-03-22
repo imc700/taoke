@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="referrer" content="never">
+    <title>输入京东商品链接或商品id</title>
+    <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+    <script>
+        $.ajaxSetup({
+            async: false
+        });
+        $(document).ready(function () {
+            $("#Search").click(function () {
+                $("#info").attr("style","display: none")
+                itemId = $("#item").val()
+                itemId = itemId.replace(/\//g,"-")
+                $.get("/query/" + itemId, function (data) {
+                    if (data.code == 200 ) {
+                        info = data.data
+                        if (data.message.indexOf("失败") != -1) {
+                            alert("商家暂时没有对该商品提出返利优惠哟.")
+                        }else{
+                            $("#info").removeAttr("hidden")
+                            $("#info").removeAttr("style")
+                            $("#img").attr("src",info[0].imgUrl)
+                            $("#goodsName").text(info[0].goodsName)
+                            $("#fanli").html("恭喜,该商品可返利: <h1 style=\"font-size:30px;color:red\">"+info[0].unitPrice*info[0].commisionRatioPc/100+"元</h1> 立即扫描二维码购买即可!哈哈~")
+                            $.get("/getLink/" + itemId, function (data2) {
+                                data2 = JSON.parse(data2)
+                                if (data2.message=="success"){
+                                    $("#mai").removeAttr("style")
+                                    $("#mai").attr("src",data2.data.data.rqCode)
+                                } else
+                                    alert("获取二维码失败,请重试!")
+                            });
+                        }
+                    }else{
+                        alert("抱歉,服务请求失败.")
+                    }
+                });
+
+            });
+        });
+    </script>
+</head>
+<body>
+<input type="text" id="item" placeholder="输入京东商品链接或商品id"/><input type="button" id="Search" value="Search">
+<br/>
+
+<br/>
+<div id="info" hidden>
+    <h2 id="goodsName"></h2>
+    <img id="img" src=""><img id="mai" src="">
+    <br/>
+    <h2 id="fanli" style="font-size:30px;color:black"></h2>
+
+</div>
+</body>
+</html>
