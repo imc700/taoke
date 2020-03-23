@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1, user-scalable=no">
+    <title>注册</title>
+    <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+    <script>
+        $.ajaxSetup({
+            async: false
+        });
+        $(document).ready(function () {
+            $("#register").click(function () {
+                username = $("#username").val()
+                password = $("#password").val()
+                if (username.length<1 | password.length<1){
+                    alert("账号或密码不能为空.")
+                }else{
+                    $.get("/doRegister?username="+username+"&password=" + password, function (data) {
+                        alert(data)
+                        window.location.href="login"
+                    })
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+<input type="text" id="username" placeholder="请输入账号"/>
+<input type="text" id="password" placeholder="请输入密码"/>
+<input type="button" id="register" value="提交注册">
+
+</body>
+</html>

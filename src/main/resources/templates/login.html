@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="referrer" content="never">
+    <title>登录</title>
+    <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+    <script>
+        $.ajaxSetup({
+            async: false
+        });
+        $(document).ready(function () {
+            $("#register").click(function () {
+                window.location.href="register"
+            });
+            $("#login").click(function () {
+                username = $("#username").val()
+                password = $("#password").val()
+                if (username.length<1 | password.length<1){
+                    alert("账号或密码不能为空.")
+                }else{
+                    $.get("/doLogin?username="+username+"&password=" + password, function (data) {
+                        if (data=="SUCCESS"){
+                            window.location.href="authc/index"
+                        }
+                    })
+                }
+            });
+        });
+
+    </script>
+</head>
+<body>
+<input type="text" id="username" placeholder="请输入账号"/>
+<input type="text" id="password" placeholder="请输入密码"/>
+<input type="button" id="login" value="login">
+<input type="button" id="register" value="register">
+
+</body>
+</html>
