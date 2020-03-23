@@ -1,14 +1,14 @@
 package com.ks.jdfen.shiro;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.shiro.authc.credential.HashedCredentialsMatcher;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Configuration
 public class ShiroConfig {
@@ -20,10 +20,10 @@ public class ShiroConfig {
         Map<String, String> filterChainDefinitionMap = new HashMap<String, String>();
         shiroFilterFactoryBean.setLoginUrl("/login");
         shiroFilterFactoryBean.setUnauthorizedUrl("/unauthc");
-        shiroFilterFactoryBean.setSuccessUrl("/authc/index");
+        shiroFilterFactoryBean.setSuccessUrl("/authc/room");
 
         filterChainDefinitionMap.put("/*", "anon");
-        filterChainDefinitionMap.put("/authc/index", "authc");
+        filterChainDefinitionMap.put("/authc/*", "authc");
         filterChainDefinitionMap.put("/authc/admin", "roles[admin]");
         filterChainDefinitionMap.put("/authc/renewable", "perms[Create,Update]");
         filterChainDefinitionMap.put("/authc/removable", "perms[Delete]");

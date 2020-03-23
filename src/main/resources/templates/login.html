@@ -21,7 +21,7 @@
                 }else{
                     $.get("/doLogin?username="+username+"&password=" + password, function (data) {
                         if (data=="SUCCESS"){
-                            window.location.href="authc/index"
+                            window.location.href="authc/room"
                         }
                     })
                 }

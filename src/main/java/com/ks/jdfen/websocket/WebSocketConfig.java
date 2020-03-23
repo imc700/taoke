@@ -1,4 +1,4 @@
-package com.ks.jdfen.shiro;
+package com.ks.jdfen.websocket;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
