@@ -5,16 +5,18 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class test20160801 {
+public class CompareResult {
     public static void main(String[] args) {
-        // TODO 自动生成的方法存根    
+        // TODO 自动生成的方法存根
         List<Person> people = new ArrayList<>();
         Person p1 = new Person("老沈");
         Person p2 = new Person("老黄");
         Person p3 = new Person("老韩");
+        Person p4 = new Person("老陈");
         people.add(p1);
         people.add(p2);
         people.add(p3);
+        people.add(p4);
         for (Person p : people) {
             p.card.random(p);
             CardSet.rank(p);
