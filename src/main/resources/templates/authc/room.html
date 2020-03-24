@@ -46,6 +46,21 @@
             $("#msg").val("");
         }
 
+        var sleep = function(time) {
+            var startTime = new Date().getTime() + parseInt(time, 10);
+            while(new Date().getTime() < startTime) {}
+        };
+
+        function fapai() {
+            // $(".iconb").show()
+            $(".iconb").fadeIn(2000);
+            /*var iconbs = $(".iconb");
+            for (i=0;i<iconbs.length;i++){
+                $(".iconb").get(i).style.display = 'block';
+                sleep(500)
+            }*/
+        }
+
         //某人登录后就直接新建websocket进行通信
         $(document).ready(function () {
             initSocket(userId);
@@ -145,6 +160,7 @@
             position: absolute;
             top: 40px;
             left: 20px;
+            display:none;
         }
 
         .icona {
@@ -154,6 +170,7 @@
             position: absolute;
             bottom: 40px;
             left: 20px;
+            display:none;
         }
 
         .iconb {
@@ -163,6 +180,7 @@
             position: absolute;
             top: 20px;
             left: 40px;
+            display:none;
         }
 
         .iconc {
@@ -172,6 +190,7 @@
             position: absolute;
             top: 20px;
             right: 40px;
+            display:none;
         }
     </style>
 </head>
@@ -190,7 +209,9 @@
     <div style="border: 1px solid red;
         width: 675px;height: 300px;margin-left: 40px;
     margin-top: 50px;border-radius: 10px;position: relative;">
-        <div class="icon9"></div>
+        <div class="icon9">
+            <input type="button" value="发牌" onclick="fapai()" />
+        </div>
 
     </div>
     <div class="icon">

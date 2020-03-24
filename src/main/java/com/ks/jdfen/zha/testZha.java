@@ -1,12 +1,5 @@
 package com.ks.jdfen.zha;
 
-import org.aspectj.util.FileUtil;
-import org.springframework.util.ResourceUtils;
-import sun.nio.ch.IOUtil;
-
-import java.io.File;
-import java.util.ArrayList;
-
 /**
  * @author ：imc
  * @date ：Created in 2020/3/24 11:15 上午
@@ -14,15 +7,19 @@ import java.util.ArrayList;
  */
 public class testZha {
     public static void main(String[] args) throws Exception {
-//        WinThreePoker poker = new WinThreePoker(new Player("1号玩家"),new Player("2号玩家"),new Player("3号玩家"));
-//        poker.startPlayingCards();
-        WinThreePoker zha = new WinThreePoker();
+        WinThreePoker poker = new WinThreePoker(new Player("1号玩家"),new Player("2号玩家"),new Player("3号玩家"));
+        poker.startPlayingCards();
+
+
+        //陈骁让处理他想要的字典
+        /*WinThreePoker zha = new WinThreePoker();
         File file = ResourceUtils.getFile("classpath:chenxiaozidian.txt");
         String content = FileUtil.readAsString(file);
         for (String pai : content.split("\n")) {
             String[] three = pai.split("\t");
             ArrayList<Card> cards = new ArrayList<>();
             for (String p : three) {
+                p = p.trim();
                 Card card = new Card();
                 card.setColor(switchStringToInt(p.substring(2, 4)));
                 card.setNumber(switchStringToInt(p.substring(4)));
@@ -51,8 +48,7 @@ public class testZha {
                     break;
             }
             System.out.println(nun);
-//        }
-        }
+        }*/
     }
 
     public static int switchStringToInt(String s){

@@ -1,8 +1,6 @@
 package com.ks.jdfen.zha;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
+import java.util.*;
 
 public class WinThreePoker {
     private Cards cards;
@@ -10,12 +8,13 @@ public class WinThreePoker {
 
     public WinThreePoker(Player... players) throws Exception {
         cards = new Cards(false);
-//        if (players.length > 8 || players.length < 2) {
-//            throw new Exception(String.valueOf("人数异常,当前人数为:"+players.length));
-//        }
-//        this.players = new ArrayList<Player>(Arrays.asList(players));
+        if (players.length > 8 || players.length < 2) {
+            throw new Exception(String.valueOf("人数异常,当前人数为:"+players.length));
+        }
+        this.players = new ArrayList<Player>(Arrays.asList(players));
     }
-     // 开始游戏到游戏结束
+
+    // 开始游戏到游戏结束
     public void startPlayingCards() {
         if (players.get(0).getPlayerCards() != null) {
             for (Player player : players) {
@@ -67,9 +66,9 @@ public class WinThreePoker {
         // 先得到所有玩家中级别最高且相等的玩家们
         ArrayList<Player> list = getPlayersOfMaxGrade(players);
         // 输出级别相等的玩家
-        for (Player player : list) {
-            System.out.println(player);
-        }
+//        for (Player player : list) {
+//            System.out.println(player);
+//        }
         // 如果可能获胜玩家数是一个，直接判定他为赢家，否则继续判定
         if (list.size() == 1) {
             System.out.println("恭喜玩家" + list.get(0).getName() + "获胜！");
@@ -93,41 +92,41 @@ public class WinThreePoker {
         int cardNumber = 0;
         // 不同的grade会执行对应分支的语句体
         switch (grade) {
-        // 豹子手牌
-        case 6:
-            // 遍历玩家Arraylist比较手牌中的第二张手牌，获取豹子最大玩家
-            for (Player player : list) {
-                if (getNumber(player, 1) > cardNumber) {
-                    cardNumber = getNumber(player, 1);
-                    winners.clear();
-                    winners.add(player);
+            // 豹子手牌
+            case 6:
+                // 遍历玩家Arraylist比较手牌中的第二张手牌，获取豹子最大玩家
+                for (Player player : list) {
+                    if (getNumber(player, 1) > cardNumber) {
+                        cardNumber = getNumber(player, 1);
+                        winners.clear();
+                        winners.add(player);
+                    }
                 }
-            }
-            break;
-        // 同花顺或顺子手牌玩家，三张牌连在一起，所以只有比较一张牌就行
-        case 3:
-        case 5:
-            for (Player player : list) {
-                if (player.getPlayerCards().get(1).getNumber() > cardNumber) {
-                    cardNumber = getNumber(player, 1);
-                    winners.clear();
-                    winners.add(player);
-                } else if (player.getPlayerCards().get(1).getNumber() == cardNumber) {
-                    winners.add(player);
+                break;
+            // 同花顺或顺子手牌玩家，三张牌连在一起，所以只有比较一张牌就行
+            case 3:
+            case 5:
+                for (Player player : list) {
+                    if (player.getPlayerCards().get(1).getNumber() > cardNumber) {
+                        cardNumber = getNumber(player, 1);
+                        winners.clear();
+                        winners.add(player);
+                    } else if (player.getPlayerCards().get(1).getNumber() == cardNumber) {
+                        winners.add(player);
+                    }
                 }
-            }
-            break;
-        // 同花与散牌
-        case 1:
-        case 4:
-            winners = getWinnerForSomeCase(2, 1, list);
-            break;
-        // 对子
-        case 2:
-            winners = getWinnerForSomeCase(1, 2, list);
-            break;
-        default:
-            break;
+                break;
+            // 同花与散牌
+            case 1:
+            case 4:
+                winners = getWinnerForSomeCase(2, 1, list);
+                break;
+            // 对子
+            case 2:
+                winners = getWinnerForSomeCase(1, 2, list);
+                break;
+            default:
+                break;
         }
         return winners;
     }
@@ -191,51 +190,57 @@ public class WinThreePoker {
 
     //判断是否是对子
     private boolean isPair(Card c1, Card c2, Card c3) {
-        if (c2.getNumber() == c1.getNumber() || c3.getNumber() == c2.getNumber()) {
+        if (c2.getNumber() == c1.getNumber() || c3.getNumber() == c2.getNumber() || c3.getNumber() == c1.getNumber()) {
             return true;
         }
         return false;
     }
 
-	//判断是否是顺子
-	private boolean isStraight(Card c1, Card c2, Card c3) {
-		if ((c1.getNumber() + 1 == c2.getNumber() && c2.getNumber() + 1 == c3.getNumber())
-				|| (c2.getNumber() == 2 && c3.getNumber() == 3 && c1.getNumber() == 14)) {
-			return true;
-		}
-		return false;
-	}
+    //判断是否是顺子
+    private boolean isStraight(Card c1, Card c2, Card c3) {
+//        if ((c1.getNumber() + 1 == c2.getNumber() && c2.getNumber() + 1 == c3.getNumber()) || (c2.getNumber() == 2 && c3.getNumber() == 3 && c1.getNumber() == 14)) return true;
 
-	// 判断是否是豹子
-	private boolean isTheSameNumber(Card c1, Card c2, Card c3) {
-		if (c1.getNumber() == c2.getNumber() && c2.getNumber() == c3.getNumber()) {
-			return true;
-		}
-		return false;
-	}
 
-	// 判断是否是同花
-	private boolean isFlushColor(Card c1, Card c2, Card c3) {
-		if (c1.getColor() == c2.getColor() && c2.getColor() == c3.getColor()) {
-			return true;
-		}
-		return false;
-	}
+        List<Integer> list = new ArrayList<>();
+        list.add(c1.getNumber());
+        list.add(c2.getNumber());
+        list.add(c3.getNumber());
+        Collections.sort(list);
+        if ((list.get(1) - list.get(0) == 1 && list.get(2) - list.get(0) == 2) || (list.get(1) - list.get(0) == 1 && list.get(2) - list.get(0) == 12))
+            return true;
+        return false;
+    }
 
-	// 获取所有玩家手牌中级别最高的玩家们
-	private ArrayList<Player> getPlayersOfMaxGrade(ArrayList<Player> players) {
-		int maxGrade = 0;
-		// 初始化一个动态数组保存级别最大的玩家
-		ArrayList<Player> maxPlayers = new ArrayList<>();
-		for (Player player : players) {
-			if (maxGrade < player.getGrade()) {
-				maxPlayers.clear();
-				maxGrade = player.getGrade();
-				maxPlayers.add(player);
-			} else if (maxGrade == player.getGrade()) {
-				maxPlayers.add(player);
-			}
-		}
-		return maxPlayers;
-	}
+    // 判断是否是豹子
+    private boolean isTheSameNumber(Card c1, Card c2, Card c3) {
+        if (c1.getNumber() == c2.getNumber() && c2.getNumber() == c3.getNumber()) {
+            return true;
+        }
+        return false;
+    }
+
+    // 判断是否是同花
+    private boolean isFlushColor(Card c1, Card c2, Card c3) {
+        if (c1.getColor() == c2.getColor() && c2.getColor() == c3.getColor()) {
+            return true;
+        }
+        return false;
+    }
+
+    // 获取所有玩家手牌中级别最高的玩家们
+    private ArrayList<Player> getPlayersOfMaxGrade(ArrayList<Player> players) {
+        int maxGrade = 0;
+        // 初始化一个动态数组保存级别最大的玩家
+        ArrayList<Player> maxPlayers = new ArrayList<>();
+        for (Player player : players) {
+            if (maxGrade < player.getGrade()) {
+                maxPlayers.clear();
+                maxGrade = player.getGrade();
+                maxPlayers.add(player);
+            } else if (maxGrade == player.getGrade()) {
+                maxPlayers.add(player);
+            }
+        }
+        return maxPlayers;
+    }
 }

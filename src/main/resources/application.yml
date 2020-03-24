@@ -4,7 +4,7 @@ spring:
   application:
     name: shiro
   datasource:
-    url: jdbc:mysql://116.63.138.138:3306/wan
+    url: jdbc:mysql://116.63.138.138:3306/wan?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=utf8&useSSL=false&allowMultiQueries=true
     username: root
     password: ss1111
     driver-class-name: com.mysql.cj.jdbc.Driver
