@@ -7,8 +7,8 @@ package com.ks.jdfen.zha;
  */
 public class testZha {
     public static void main(String[] args) throws Exception {
-        WinThreePoker poker = new WinThreePoker(new Player("1号玩家"),new Player("2号玩家"),new Player("3号玩家"));
-        poker.startPlayingCards();
+//        WinThreePoker poker = new WinThreePoker(new Player("1号玩家"),new Player("2号玩家"),new Player("3号玩家"));
+//        poker.startPlayingCards();
 
 
         //陈骁让处理他想要的字典

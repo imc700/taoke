@@ -1,5 +1,7 @@
 package com.ks.jdfen.websocket;
 
+import com.ks.jdfen.zha.Player;
+import com.ks.jdfen.zha.WinThreePoker;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -8,6 +10,7 @@ import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -75,14 +78,48 @@ public class WebSocketServer {
             //如果给所有人发消息携带@ALL, 给特定人发消息携带@xxx@xxx#message
             String[] split = message.split("#");
             if (split.length>1){
-                String[] users = split[0].split("@");
-                if (users.length<2){return;}
-                String firstuser = users[1].trim();
+                String[] split1 = split[0].split("@");
+                if (split1.length<2){return;}
+                String firstuser = split1[1].trim();
+
+
+
+
+
+                //暂时肯定是给所有发送消息
                 if (StringUtils.isEmpty(firstuser)||"ALL".equals(firstuser.toUpperCase())){
+                    if (split[1].contains("fapai")){
+                        //接到发牌指令,后台开始发牌,给每个人生成牌并且用map接收
+                        ArrayList<Player> list = new ArrayList<>();
+                        for (String s : users.keySet()) {
+                            list.add(new Player(s));
+                        }
+                        try {
+                            WinThreePoker poker = new WinThreePoker(list);
+                        }catch (Exception e){
+                            sendInfo("exception:"+e.getMessage());
+                            return;
+                        }
+//                        poker.startPlayingCards();
+                    }
+
+
+
+
+
+
+
                     String msg =username +": "+ split[1];
                     sendInfo(msg);//群发消息
-                }else{//给特定人员发消息
-                    for (String user : users) {
+
+                }
+
+
+
+
+
+                else{//给特定人员发消息
+                    for (String user : split1) {
                         if (!StringUtils.isEmpty(user.trim())){
                             sendMessageToSomeBody(user.trim(),split[1]);
                         }

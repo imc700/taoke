@@ -17,15 +17,21 @@
                 console.log("您的浏览器支持WebSocket/websocket");
             }
             //socket连接地址: 注意是ws协议
-            socket = new WebSocket("ws://localhost:8088/websocket/" + userId);
+            socket = new WebSocket("ws://192.168.2.123:8088/websocket/" + userId);
             socket.onopen = function () {
                 console.log("Socket 已打开");
             };
             //获得消息事件
             socket.onmessage = function (msg) {
-                var histroy = $("#history").val();
-                $("#history").val(histroy + "\r\n" + msg.data);
-                console.log($(msg));
+                hei = msg.data+""
+                if (hei.indexOf("fapai")!=-1){
+                    fapai();
+                    console.log("开始发牌")
+                }else{
+                    var histroy = $("#history").val();
+                    $("#history").val(histroy + "\r\n" + msg.data);
+                    console.log($(msg));
+                }
             };
             //关闭事件
             socket.onclose = function () {
@@ -33,17 +39,23 @@
             };
             //错误事件
             socket.onerror = function () {
-                alert("Socket发生了错误");
+                console.log("Socket发生了错误");
             }
             $(window).unload(function () {
                 socket.close();
             });
         }
         //点击按钮发送消息
-        function send() {
-            console.log("发送消息: " + $("#msg").val());
-            socket.send("@ALL#" + $("#msg").val());
-            $("#msg").val("");
+        function send(msg) {
+            msg=msg+""
+            if (msg.startsWith("hx")){
+                socket.send("@ALL#" + msg);
+            }else{
+                console.log("发送消息: " + $("#msg").val());
+                socket.send("@ALL#" + $("#msg").val());
+                $("#msg").val("");
+            }
+
         }
 
         var sleep = function(time) {
@@ -53,12 +65,11 @@
 
         function fapai() {
             // $(".iconb").show()
-            $(".iconb").fadeIn(2000);
-            /*var iconbs = $(".iconb");
-            for (i=0;i<iconbs.length;i++){
-                $(".iconb").get(i).style.display = 'block';
-                sleep(500)
-            }*/
+            $(".icons").fadeIn(4000);
+            $(".icona").fadeIn(4000);
+            $(".iconb").fadeIn(4000);
+            $(".iconc").fadeIn(4000);
+
         }
 
         //某人登录后就直接新建websocket进行通信
@@ -142,11 +153,14 @@
         .icon9 {
             width: 100px;
             height: 30px;
-            background-color: green;
+            background-color: red;
             position: absolute;
             left: 50%;
             top: 50%;
             transform: translate(-50%, -50%);
+            text-align:center;
+            vertical-align: middle;
+            line-height: 30px;
             /* left: 50%;
             top: 50%;
             margin-left: -338px;
@@ -156,7 +170,7 @@
         .icons {
             width: 10px;
             height: 10px;
-            background-color: red;
+            background-color: gray;
             position: absolute;
             top: 40px;
             left: 20px;
@@ -166,7 +180,7 @@
         .icona {
             width: 10px;
             height: 10px;
-            background-color: red;
+            background-color: gray;
             position: absolute;
             bottom: 40px;
             left: 20px;
@@ -176,7 +190,7 @@
         .iconb {
             width: 10px;
             height: 10px;
-            background-color: red;
+            background-color: gray;
             position: absolute;
             top: 20px;
             left: 40px;
@@ -186,7 +200,7 @@
         .iconc {
             width: 10px;
             height: 10px;
-            background-color: red;
+            background-color: gray;
             position: absolute;
             top: 20px;
             right: 40px;
@@ -209,8 +223,9 @@
     <div style="border: 1px solid red;
         width: 675px;height: 300px;margin-left: 40px;
     margin-top: 50px;border-radius: 10px;position: relative;">
-        <div class="icon9">
-            <input type="button" value="发牌" onclick="fapai()" />
+        <div class="icon9" onclick="send('hxfapai')">
+<!--            <input type="button" value="发牌" onclick="send('hxfapai')" />-->
+            发牌
         </div>
 
     </div>
@@ -258,7 +273,7 @@
 </div>
 <div style="margin: 100px 20px;">
     <textarea id="msg" placeholder="人到齐勒冒?开炸啊..." style="width: 675px;height: 50px"></textarea>
-    <input type="button" onclick="send()" value="发送消息">
+    <input type="button" value="发送消息" onclick="send()">
     <br>
     <textarea id="history" style="width: 675px;height: 200px ; max-lines: 10"></textarea>
 </div>

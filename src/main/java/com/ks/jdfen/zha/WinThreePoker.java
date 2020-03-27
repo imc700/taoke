@@ -6,12 +6,12 @@ public class WinThreePoker {
     private Cards cards;
     private ArrayList<Player> players;
 
-    public WinThreePoker(Player... players) throws Exception {
+    public WinThreePoker(ArrayList<Player> players) throws Exception {
         cards = new Cards(false);
-        if (players.length > 8 || players.length < 2) {
-            throw new Exception(String.valueOf("人数异常,当前人数为:"+players.length));
+        if (players.size() > 8 || players.size() < 2) {
+            throw new Exception(String.valueOf("人数异常,本桌发牌支持2-8人,当前人数为:"+players.size()));
         }
-        this.players = new ArrayList<Player>(Arrays.asList(players));
+        this.players = players;
     }
 
     // 开始游戏到游戏结束
