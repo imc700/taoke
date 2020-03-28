@@ -1,4 +1,4 @@
-package com.ks.jdfen.controller.dao;
+package com.ks.jdfen.dao;
 
 import com.ks.jdfen.Entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;

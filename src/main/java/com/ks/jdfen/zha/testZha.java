@@ -1,5 +1,8 @@
 package com.ks.jdfen.zha;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * @author ：imc
  * @date ：Created in 2020/3/24 11:15 上午
@@ -7,6 +10,8 @@ package com.ks.jdfen.zha;
  */
 public class testZha {
     public static void main(String[] args) throws Exception {
+        List<String> seatNameList = Arrays.asList("1","","","","","","","");
+        System.out.println(seatNameList.indexOf(""));
 //        WinThreePoker poker = new WinThreePoker(new Player("1号玩家"),new Player("2号玩家"),new Player("3号玩家"));
 //        poker.startPlayingCards();
 

@@ -1,16 +1,8 @@
 package com.ks.jdfen.Entity;
 
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.List;
-
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.Table;
 
 @Entity
 @Table(name = "user_t")
@@ -22,10 +14,19 @@ public class User implements Serializable {
     private String username;
     private String password;
     private String salt;
+    private int money;
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_role_t", joinColumns = { @JoinColumn(name = "uid") }, inverseJoinColumns = {
             @JoinColumn(name = "rid") })
     private List<SysRole> roles;
+
+    public int getMoney() {
+        return money;
+    }
+
+    public void setMoney(int money) {
+        this.money = money;
+    }
 
     public long getId() {
         return id;
@@ -73,7 +74,7 @@ public class User implements Serializable {
 
     @Override
     public String toString() {
-        return "User [id=" + id + ", username=" + username + "]";
+        return "User [id=" + id + ", username=" + username+ ", money=" + money + "]";
     }
 
 }

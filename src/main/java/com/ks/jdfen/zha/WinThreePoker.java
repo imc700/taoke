@@ -6,6 +6,22 @@ public class WinThreePoker {
     private Cards cards;
     private ArrayList<Player> players;
 
+    public Cards getCards() {
+        return cards;
+    }
+
+    public void setCards(Cards cards) {
+        this.cards = cards;
+    }
+
+    public ArrayList<Player> getPlayers() {
+        return players;
+    }
+
+    public void setPlayers(ArrayList<Player> players) {
+        this.players = players;
+    }
+
     public WinThreePoker(ArrayList<Player> players) throws Exception {
         cards = new Cards(false);
         if (players.size() > 8 || players.size() < 2) {

@@ -1,7 +1,7 @@
 package com.ks.jdfen.service.impl;
 
 import com.ks.jdfen.Entity.User;
-import com.ks.jdfen.controller.dao.UserDao;
+import com.ks.jdfen.dao.UserDao;
 import com.ks.jdfen.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

@@ -1,13 +1,28 @@
 package com.ks.jdfen;
 
+import com.ks.jdfen.Entity.User;
+import com.ks.jdfen.dao.UserDao;
+import com.ks.jdfen.service.UserService;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
+import javax.annotation.Resource;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@RunWith(SpringRunner.class)
 @SpringBootTest
 public class test {
+
+    @Resource
+    UserService userService;
+
+    @Resource
+    UserDao userDao;
+
     @Test
     public void test2(){
         String itemId = "https://item.jd.com/11944842773.html#none";
@@ -32,6 +47,14 @@ public class test {
         }
 
 
+    }
 
+    @Test
+    public void testSql(){
+        User user = userService.findUserByName("imc700");
+        System.out.println(user);
+
+        List<User> all = userDao.findAll();
+        System.out.println();
     }
 }

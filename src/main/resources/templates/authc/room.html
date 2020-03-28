@@ -1,11 +1,14 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.springframework.org/schema/mvc">
+<html lang="en" xmlns:th="http://www.springframework.org/schema/mvc"
+      xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
     <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
     <script th:inline="javascript">
+        ip = "localhost:8089";
+        seats = ["icon1","icon5","icon6","icon3","icon4","icon8","icon7","icon2"]
         var userId = [[${ userId }]];
         console.log(userId)
         var socket;
@@ -17,17 +20,34 @@
                 console.log("您的浏览器支持WebSocket/websocket");
             }
             //socket连接地址: 注意是ws协议
-            socket = new WebSocket("ws://192.168.2.123:8088/websocket/" + userId);
+            socket = new WebSocket("ws://"+ ip +"/websocket/" + userId);
+            // socket = new WebSocket("ws://./websocket/" + userId);
             socket.onopen = function () {
-                console.log("Socket 已打开");
+                console.log("Socket 已打开，並找个位置坐下");
             };
             //获得消息事件
             socket.onmessage = function (msg) {
+                console.log(msg)
                 hei = msg.data+""
                 if (hei.indexOf("fapai")!=-1){
                     fapai();
                     console.log("开始发牌")
-                }else{
+                    $('#fapai').hide();
+                    $('#kanpai').show();
+                }else if(hei.indexOf("kanpai")!=-1){//牌面由后台传给该兄弟
+                    kanpai(hei.split("#")[1]);
+                    console.log("开始看牌")
+                }else if(hei.indexOf("kanbianse")!=-1){
+                    kanbianse(hei.split("bianse")[1]);
+                }else if(hei.indexOf("shangzuo")!=-1){
+                    var sz0 = hei.split("#")[1];
+                    var money0 = hei.split("#")[2];
+                    var peopleOfSeats = sz0.substring(1,sz0.length-1).split(",");
+                    var moneyOfSeats = money0.substring(1,money0.length-1).split(",");
+                    console.log(peopleOfSeats);
+                    takeAseat(peopleOfSeats,moneyOfSeats)
+                }
+                else{
                     var histroy = $("#history").val();
                     $("#history").val(histroy + "\r\n" + msg.data);
                     console.log($(msg));
@@ -45,11 +65,13 @@
                 socket.close();
             });
         }
-        //点击按钮发送消息
+        //点击按钮发送消息,指定某人和给所有人发送执行命令和发消息有具体格式要求
         function send(msg) {
             msg=msg+""
-            if (msg.startsWith("hx")){
-                socket.send("@ALL#" + msg);
+            if (msg.indexOf("zhiding")!=-1){
+                socket.send("@"+ userId+"#"+ msg.split("#")[1]);
+            } else if (msg.startsWith("hx")){
+                socket.send('@ALL#' + msg);
             }else{
                 console.log("发送消息: " + $("#msg").val());
                 socket.send("@ALL#" + $("#msg").val());
@@ -64,22 +86,68 @@
         };
 
         function fapai() {
-            // $(".iconb").show()
-            $(".icons").fadeIn(4000);
-            $(".icona").fadeIn(4000);
-            $(".iconb").fadeIn(4000);
-            $(".iconc").fadeIn(4000);
+            // $(".icons").fadeIn(4000);
+            // $(".icona").fadeIn(4000);
+            // $(".iconb").fadeIn(4000);
+            // $(".iconc").fadeIn(4000);
 
+            //只有座位上有名字的人,发牌的话,才把牌显示出来
+            for (var i = 0; i < seats.length; i++){
+                if ($("." + seats[i]).html().indexOf("::") != -1){
+                    var divs = $("."+seats[i]).children("div");
+                    for (var j = 0; j < divs.length; j++) {
+                        divs.eq(j).fadeIn(4000);
+                    }
+                }
+            }
+        }
+        function kanpai(pai3) {
+            // $("#paimian").html(pai3);
+            $("#kanpai").html(pai3);
+            $("#kanpai").css("background-color","white");
+            send('hxkanbianse'+userId);
+        }
+        
+        function kanbianse(whopankai) {
+            //既然看了牌,就把自己面前的牌弄成红色,高速其他玩家已看牌,表示危险
+            for (var i = 0; i < seats.length; i++){
+                if ($("." + seats[i]).html().indexOf(whopankai) != -1){
+                    var divs = $("."+seats[i]).children("div");
+                    for (var j = 0; j < divs.length; j++) {
+                        divs.eq(j).css("background-color","red")
+                    }
+                    break;
+                }
+            }
         }
 
+        function takeAseat(sz,moneysz){
+            for (var i = 0; i < seats.length; i++){
+                //先把有名字的座位还原,然后再分配座位
+                    $("."+seats[i]).html(seatHtmls[i]);
+                }
+            
+            for (var i = 0; i < seats.length; i++){
+                if (sz[i].trim() != ""){
+                    if ($("." + seats[i]).html().indexOf("::") == -1)
+                        $("."+seats[i]).html(sz[i]+ "::"+moneysz[i]+$("."+seats[i]).html())
+                }
+            }
+        }
+
+        seatHtmls = []
         //某人登录后就直接新建websocket进行通信
         $(document).ready(function () {
+            for (var i = 0; i < seats.length; i++){
+                seatHtmls.push($("."+seats[i]).html())
+            }
+
             initSocket(userId);
         })
     </script>
     <style>
-        .icon {
-            width: 100px;
+        .icon1 {
+            width: 110px;
             height: 30px;
             background-color: green;
             position: absolute;
@@ -88,7 +156,7 @@
         }
 
         .icon2 {
-            width: 100px;
+            width: 110px;
             height: 30px;
             background-color: green;
             position: absolute;
@@ -97,7 +165,7 @@
         }
 
         .icon3 {
-            width: 100px;
+            width: 110px;
             height: 30px;
             background-color: green;
             position: absolute;
@@ -106,7 +174,7 @@
         }
 
         .icon4 {
-            width: 100px;
+            width: 110px;
             height: 30px;
             background-color: green;
             position: absolute;
@@ -167,6 +235,45 @@
             margin-bottom: -150px; */
         }
 
+        .xiazhu {
+            width: 50px;
+            height: 30px;
+            background-color: red;
+            position: absolute;
+            left: 55%;
+            top: 75%;
+            transform: translate(-50%, -50%);
+            text-align:center;
+            vertical-align: middle;
+            line-height: 30px;
+        }
+
+        .xiazhumoney {
+            width: 50px;
+            height: 30px;
+            /*background-color: red;*/
+            position: absolute;
+            left: 45%;
+            top: 75%;
+            transform: translate(-50%, -50%);
+            text-align:center;
+            vertical-align: middle;
+            line-height: 30px;
+        }
+
+        .jifenchi {
+            width: 100px;
+            height: 30px;
+            background-color: yellow;
+            position: absolute;
+            left: 50%;
+            top: 25%;
+            transform: translate(-50%, -50%);
+            text-align:center;
+            vertical-align: middle;
+            line-height: 30px;
+        }
+
         .icons {
             width: 10px;
             height: 10px;
@@ -223,16 +330,19 @@
     <div style="border: 1px solid red;
         width: 675px;height: 300px;margin-left: 40px;
     margin-top: 50px;border-radius: 10px;position: relative;">
-        <div class="icon9" onclick="send('hxfapai')">
-<!--            <input type="button" value="发牌" onclick="send('hxfapai')" />-->
-            发牌
-        </div>
+        <div class="jifenchi" id="jifenchi" onclick="" >积分池:0</div>
+        <shiro:hasPermission name="kanpai"><div class="icon9" id="kanpai" onclicvk="send('zhiding#' +'kanpai')" hidden>看牌</div></shiro:hasPermission>
+        <shiro:hasPermission name="fapai"><div class="icon9" id="fapai" onclick="send('hxfapai');" >发牌</div></shiro:hasPermission>
+        <input type="text" class="xiazhumoney" value="1" hidden/>
+        <div class="xiazhu" id="xiazhu" onclick="" hidden>下注</div>
 
     </div>
-    <div class="icon">
+    <div class="icon1">
         <div class="icons"></div>
         <div class="icons" style="margin-left: 20px;"></div>
         <div class="icons" style="margin-left: 40px;"></div>
+<!--        <div class="xiazhu" style="margin-left: 40px;"><input class="xiazhu" type="text" /><input type="button" value="下注" onclick="xiazhu()" /></div>-->
+
     </div>
     <div class="icon2">
         <div class="icons"></div>
@@ -271,6 +381,12 @@
     </div>
 
 </div>
+<br/>
+<br/>
+<h1 id="paimian"></h1>
+<!--<br/>
+<br/>
+<input type="text" /><input type="button" value="下注" onclick="xiazhu()" />-->
 <div style="margin: 100px 20px;">
     <textarea id="msg" placeholder="人到齐勒冒?开炸啊..." style="width: 675px;height: 50px"></textarea>
     <input type="button" value="发送消息" onclick="send()">

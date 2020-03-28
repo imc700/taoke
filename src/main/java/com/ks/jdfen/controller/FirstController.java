@@ -8,9 +8,6 @@ import com.ks.jdfen.controller.myutil.URLConnection;
 import jd.union.open.goods.promotiongoodsinfo.query.request.UnionOpenGoodsPromotiongoodsinfoQueryRequest;
 import jd.union.open.goods.promotiongoodsinfo.query.response.UnionOpenGoodsPromotiongoodsinfoQueryResponse;*/
 
-import com.ks.jdfen.Entity.User;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.subject.Subject;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -41,7 +38,7 @@ public class FirstController {
 
 
 
-@RequestMapping("/jd")
+    @RequestMapping("/jd")
     public String jdSearch() {
         return "jdSearch";
     }

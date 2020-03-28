@@ -34,8 +34,9 @@ public class HomeController {
         } catch (UnknownAccountException uae) {
             return "username error!";
         }
-
+//        SecurityUtils.getSubject().isPermitted(username);
         User user = userService.findUserByName(username);
+//        User user=(User) subject.getPrincipal();
         subject.getSession().setAttribute("user", user);
         return "SUCCESS";
     }
