@@ -3,8 +3,8 @@ package com.ks.jdfen.controller;
 /*import com.jd.open.api.sdk.DefaultJdClient;
 import com.jd.open.api.sdk.JdClient;
 import com.jd.open.api.sdk.JdException;
-import com.ks.jdfen.controller.myutil.JdUtils;
-import com.ks.jdfen.controller.myutil.URLConnection;
+import JdUtils;
+import URLConnection;
 import jd.union.open.goods.promotiongoodsinfo.query.request.UnionOpenGoodsPromotiongoodsinfoQueryRequest;
 import jd.union.open.goods.promotiongoodsinfo.query.response.UnionOpenGoodsPromotiongoodsinfoQueryResponse;*/
 

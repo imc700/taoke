@@ -1,4 +1,4 @@
-package com.ks.jdfen.controller.myutil;
+package com.ks.jdfen.myutil;
 
 import java.util.ArrayList;
 import java.util.Arrays;

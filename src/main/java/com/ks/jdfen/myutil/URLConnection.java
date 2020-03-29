@@ -1,4 +1,4 @@
-package com.ks.jdfen.controller.myutil;
+package com.ks.jdfen.myutil;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;

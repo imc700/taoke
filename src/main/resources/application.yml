@@ -7,7 +7,7 @@ spring:
     url: jdbc:mysql://116.63.138.138:3306/wan?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=utf8&useSSL=false&allowMultiQueries=true&autoReconnect=true
     username: root
     password: ss1111
-    driver-class-name: com.mysql.jdbc.Driver
+    driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       maximum-pool-size: 30
       minimum-idle: 10
@@ -22,3 +22,15 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQL5Dialect
         format_sql: true
+  redis:
+    host: 116.63.138.138
+    timeout: 5000
+    password: ss1111
+    port: 6379
+    jedis:
+      pool:
+        max-idle: -1
+        min-idle: 0
+        max-active: 2000
+        max-wait: -1
+    database: 1

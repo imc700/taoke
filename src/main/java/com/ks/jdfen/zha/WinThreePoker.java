@@ -78,7 +78,8 @@ public class WinThreePoker {
     }
 
     // 炸金花规则， 并在控制台输出获胜玩家！
-    private void judge(ArrayList<Player> players) {
+    public String judge(ArrayList<Player> players) {
+        String finalWinName = "";
         // 先得到所有玩家中级别最高且相等的玩家们
         ArrayList<Player> list = getPlayersOfMaxGrade(players);
         // 输出级别相等的玩家
@@ -94,9 +95,11 @@ public class WinThreePoker {
             // 遍历获胜玩家动态数组，并输出
             for (Player player : list) {
                 System.out.println("恭喜玩家" + player.getName() + "获胜！");
+                finalWinName = player.getName();
             }
         }
         System.out.println();
+        return finalWinName;
     }
 
     //得出所有获胜的玩家
