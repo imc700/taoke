@@ -92,6 +92,7 @@ public class WebSocketServer {
         for (String name : seatNameList) {
             if (!StringUtils.isEmpty(name)) {
                 for (User u : allUser) {
+                    redisUtil.del(u.getUsername());
                     if (name.equals(u.getUsername())) {
                         seatMoneyList.add(u.getMoney());
                         break;
@@ -111,9 +112,9 @@ public class WebSocketServer {
     public void onClose() {
         users.remove(this.username);  //从set中删除
         subOnlineCount();           //在线数减1
-        log.info("一个连接关闭！当前在线人数为" + getOnlineCount());
+        log.info(this.username+"一个连接关闭！当前在线人数为" + getOnlineCount());
         try {
-            seatNameList.set(seatNameList.indexOf(this.username), "");
+            if (seatNameList.indexOf(this.username)>=0) seatNameList.set(seatNameList.indexOf(this.username), "");
             seatMoneyList.clear();
             getMoneyListByNames(seatNameList);
             sendInfo("shangzuo#" + seatNameList + "#" + seatMoneyList);
@@ -156,7 +157,7 @@ public class WebSocketServer {
                         List<Integer> list1 = new ArrayList<>();
                         list1.add(1);
                         for (String s : users.keySet()) {
-                            redisUtil.del(s);//发牌的话,把上一局的所有投注记录都删掉.
+//                            redisUtil.del(s);//发牌的话,把上一局的所有投注记录都删掉.2020年3月30日21:35:35决定在查询到所有人的数据的时候去删redis
                             list.add(new Player(s));
                             redisUtil.set(s, list1);
                         }
@@ -221,6 +222,14 @@ public class WebSocketServer {
         try {
             WinThreePoker threePoker = new WinThreePoker(nowPlayers);
             String finalWinnerName = threePoker.judge(nowPlayers);
+
+            //此时应该把全局变量全部初始化,让玩家刷新浏览器重新进场并开局
+            onlineCount = 0;
+            list.clear();
+            seatNameList = Arrays.asList("", "", "", "", "", "", "", "");
+            tempNameList = Arrays.asList("", "", "", "", "", "", "", "");//从发牌时初始化这个值.这局他参与了,但是弃牌了就从temp里删掉.
+            seatMoneyList.clear();
+
             return finalWinnerName;
         } catch (Exception e) {
             e.printStackTrace();

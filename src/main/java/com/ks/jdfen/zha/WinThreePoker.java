@@ -89,6 +89,7 @@ public class WinThreePoker {
         // 如果可能获胜玩家数是一个，直接判定他为赢家，否则继续判定
         if (list.size() == 1) {
             System.out.println("恭喜玩家" + list.get(0).getName() + "获胜！");
+            return list.get(0).getName();
         } else {
             // 如果可能获胜的玩家不止一个，得到所有获胜玩家
             list = getWinners(list);
