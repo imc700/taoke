@@ -95,7 +95,8 @@ public class WinThreePoker {
             // 遍历获胜玩家动态数组，并输出
             for (Player player : list) {
                 System.out.println("恭喜玩家" + player.getName() + "获胜！");
-                finalWinName = player.getName();
+                return player.getName();
+//                finalWinName = player.getName();
             }
         }
         System.out.println();

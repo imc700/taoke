@@ -149,6 +149,7 @@ public class WebSocketServer {
                 //暂时肯定是给所有发送消息
                 if (StringUtils.isEmpty(firstuser) || "ALL".equals(firstuser.toUpperCase())) {
                     if (split[1].contains("fapai")) {
+                        tempNameList = seatNameList;//开局就把temp设值
                         //接到发牌指令,后台开始发牌,给每个人生成牌并且用map接收
                         list.clear();//这里必须请掉,因为再发牌的时候还不晓得是几个人呢,因为有人可能不玩了.
                         //发牌滴话,每个人下个底子,默认1块钱
@@ -166,7 +167,6 @@ public class WebSocketServer {
                             //发牌完后让下家开始下注
                             sendMessageToSomeBody(nextPlayerName(), "zhunbeixia");
                             System.out.println("####################" + nextPlayerName());
-                            tempNameList = seatNameList;
                             //底子都下了,然后就是在前台刷新下注记录
                             Map<String, List> map = new HashMap<>();
                             for (String key : redisUtil.keys("*")) {
@@ -251,8 +251,8 @@ public class WebSocketServer {
 
     private String nextPlayerName() {
         List<String> arrayList = new ArrayList<>();
-        arrayList.addAll(seatNameList);
-        arrayList.addAll(seatNameList);
+        arrayList.addAll(tempNameList);//这里换一下因为如果有人弃牌了,下注的人就从temp里拿,因为弃牌的人不用再下注
+        arrayList.addAll(tempNameList);
         List<String> collect = arrayList.stream().filter(s -> !StringUtils.isEmpty(s)).collect(Collectors.toList());
         //防止最后一名兄弟发牌,然后一个循环的话,找不到下家
         return collect.get(collect.indexOf(this.username) + 1);

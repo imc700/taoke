@@ -17,7 +17,7 @@
             $("#xiafang").html(xiafangHtml);
             for (var i = names.length-1; i >=0; i--){
                 if (names[i].trim()!=""){
-                    var addHtml = "<textarea id=\""+names[i].trim()+"\" style=\"width: 675px;height: 15px\">"+names[i].trim()+"下注:</textarea>"
+                    var addHtml = "<textarea id=\""+names[i].trim()+"\" style=\"width: 675px;height: 15px\">"+names[i].trim()+"下注:</textarea><br/>"
                     $("#xiafang").html(addHtml+$("#xiafang").html())
                 }
             }
@@ -158,7 +158,7 @@
             $("#kanpai").css("background-color","white");
             send('hxkanbianse'+userId);
         }
-        
+
         function kanbianse(whopankai,yanse) {
             //既然看了牌,就把自己面前的牌弄成红色,高速其他玩家已看牌,表示危险
             for (var i = 0; i < seats.length; i++){
@@ -421,7 +421,7 @@
         <div class="jifenchi" id="jifenchi" onclick="" >积分池:0</div>
         <shiro:hasPermission name="kanpai"><div class="icon9" id="kanpai" onclick="send('zhiding#' +'kanpai')" hidden>看牌</div></shiro:hasPermission>
         <shiro:hasPermission name="fapai"><div class="icon9" id="fapai" onclick="send('hxfapai');" >发牌</div></shiro:hasPermission>
-        <div class="icon11" id="qipai" onclick="send('hxqipai');" >弃牌</div>
+        <div class="icon11" id="qipai" onclick="$('#xiazhumoney').val(0); record();send('hxqipai');" >弃牌</div>
         <div class="icon10" id="kaipai" onclick="send('hxkaipai');" >开牌</div>
         <input type="text" id="xiazhumoney" class="xiazhumoney" value="1" />
         <div class="xiazhu" id="xiazhu" onclick="record()" >下注</div>
