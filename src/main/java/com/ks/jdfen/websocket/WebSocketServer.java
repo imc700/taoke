@@ -8,6 +8,7 @@ import com.ks.jdfen.service.UserService;
 import com.ks.jdfen.zha.Player;
 import com.ks.jdfen.zha.WinThreePoker;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -92,7 +93,7 @@ public class WebSocketServer {
         for (String name : seatNameList) {
             if (!StringUtils.isEmpty(name)) {
                 for (User u : allUser) {
-                    redisUtil.del(u.getUsername());
+//                    redisUtil.del(u.getUsername());
                     if (name.equals(u.getUsername())) {
                         seatMoneyList.add(u.getMoney());
                         break;
@@ -112,9 +113,9 @@ public class WebSocketServer {
     public void onClose() {
         users.remove(this.username);  //从set中删除
         subOnlineCount();           //在线数减1
-        log.info(this.username+"一个连接关闭！当前在线人数为" + getOnlineCount());
+        log.info(this.username + "一个连接关闭！当前在线人数为" + getOnlineCount());
         try {
-            if (seatNameList.indexOf(this.username)>=0) seatNameList.set(seatNameList.indexOf(this.username), "");
+            if (seatNameList.indexOf(this.username) >= 0) seatNameList.set(seatNameList.indexOf(this.username), "");
             seatMoneyList.clear();
             getMoneyListByNames(seatNameList);
             sendInfo("shangzuo#" + seatNameList + "#" + seatMoneyList);
@@ -150,6 +151,13 @@ public class WebSocketServer {
                 //暂时肯定是给所有发送消息
                 if (StringUtils.isEmpty(firstuser) || "ALL".equals(firstuser.toUpperCase())) {
                     if (split[1].contains("fapai")) {
+                        //发牌的时候把上一局的下注记录都删除掉.因为上一局已经结算了.
+                        List<User> allUser = userDao.findAll();
+                        for (User u : allUser) {
+                            redisUtil.del(u.getUsername());
+                        }
+
+
                         tempNameList = seatNameList;//开局就把temp设值
                         //接到发牌指令,后台开始发牌,给每个人生成牌并且用map接收
                         list.clear();//这里必须请掉,因为再发牌的时候还不晓得是几个人呢,因为有人可能不玩了.
@@ -173,7 +181,7 @@ public class WebSocketServer {
                             for (String key : redisUtil.keys("*")) {
                                 map.put(key, (List<Integer>) redisUtil.get(key));
                             }
-                            sendInfo("yixiazhu"+JSON.toJSONString(map));
+                            sendInfo("yixiazhu" + JSON.toJSONString(map));
                         } catch (Exception e) {
                             sendInfo("exception:" + e.getMessage());
                             return;
@@ -182,9 +190,9 @@ public class WebSocketServer {
                         xiazhu(split[1]);
                         return;
                     } else if (split[1].contains("qipai")) {//弃牌就是从temp里删掉并告诉所有前端该人已弃牌(比如把这个人面前的牌置白)
-                        tempNameList.set(tempNameList.indexOf(this.username),"");
+                        tempNameList.set(tempNameList.indexOf(this.username), "");
                     } else if (split[1].contains("kaipai")) {//点击开牌的话,
-                        sendInfo("kaipai:"+kaipai());
+                        sendInfo("kaipai:" + kaipai());
                         return;
                     }
                     String msg = username + ": " + split[1];
@@ -229,7 +237,7 @@ public class WebSocketServer {
             seatNameList = Arrays.asList("", "", "", "", "", "", "", "");
             tempNameList = Arrays.asList("", "", "", "", "", "", "", "");//从发牌时初始化这个值.这局他参与了,但是弃牌了就从temp里删掉.
             seatMoneyList.clear();
-
+            SecurityUtils.getSubject().getSession().setAttribute("winner",finalWinnerName);
             return finalWinnerName;
         } catch (Exception e) {
             e.printStackTrace();
@@ -252,9 +260,9 @@ public class WebSocketServer {
         for (String key : redisUtil.keys("*")) {
             map.put(key, (List<Integer>) redisUtil.get(key));
         }
-        sendInfo("yixiazhu"+JSON.toJSONString(map));
+        sendInfo("yixiazhu" + JSON.toJSONString(map));
         //并告诉下一个人要显示下注按钮了
-        System.out.println("轮到"+nextPlayerName()+"下注了...");
+        System.out.println("轮到" + nextPlayerName() + "下注了...");
         sendMessageToSomeBody(nextPlayerName(), "zhunbeixia");
     }
 
@@ -280,7 +288,7 @@ public class WebSocketServer {
         }
         users.get(username).session.getBasicRemote().sendText(this.username + "@" + username + ": " + message);
 //        this.session.getBasicRemote().sendText(this.username + "@" + username + ": " + message);
-        System.out.println("给特定人员发送消息:"+this.username + "@" + username + ": " + message);
+        System.out.println("给特定人员发送消息:" + this.username + "@" + username + ": " + message);
     }
 
     /**

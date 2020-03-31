@@ -47,11 +47,14 @@
 
         function kaipai(key) {//此处的key就是赢家的名字
             $("#"+key).html($("#"+key).html()+"       赢");
+            $.get("/settleAccounts", function (data) {
+                if (data == "SUCCESS") {
+                    window.location.href = "authc/room"
+                }
+            });
             alert(key+"是最后的赢家!")
             //此时要用ajax处理一下各玩家的金额,也可以用ajax设置新的房主,方便后续下一轮操作
-            //此时应该去后台把全局变量重新初始化一下
-            window.location.reload();//不能用reload,因为会导致玩家莫名掉线.
-            // initSocket(userId);
+            window.location.reload();//玩完一局让各玩家重新进场,reload可以初始化页面.
         }
 
         //登录过后初始化socket连接
