@@ -8,6 +8,7 @@ import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -19,53 +20,60 @@ import java.util.List;
 public class AuthcController {
 
     @Autowired
-    private static RedisUtil redisUtil;
+    private RedisUtil redisUtil;
 
     @Autowired
-    private static UserDao userDao;
+    private UserDao userDao;
 
     @RequestMapping("/room")
     public Object room(Model model) {
         Subject subject = SecurityUtils.getSubject();
         User user = (User) subject.getSession().getAttribute("user");
-        model.addAttribute("userId",user.getUsername());
+        model.addAttribute("userId", user.getUsername());
         return "authc/room";
     }
 
     @ResponseBody
-    @RequestMapping("/settleAccounts")
-    public void settleAccounts() {
-        String winner = (String) SecurityUtils.getSubject().getSession().getAttribute("winner");
+    @RequestMapping("/settleAccounts/{winner}")
+    public String settleAccounts(@PathVariable("winner") String winner) {
         int jifenchiTotal = 0;
         List<User> users = userDao.findAll();
         for (String key : redisUtil.keys("*")) {
             for (User user : users) {
                 //每个人都结算下并存入数据库
-                if (user.getUsername().equals(key)){
-                    jifenchiTotal+=countAndUpdateUser(user,winner);
+                if (user.getUsername().equals(key)) {
+                    jifenchiTotal += countAndUpdateUser(user, winner);
                     break;
                 }
             }
         }
-
+        //赢家把积分池的钱加上
+        for (User user : users) {
+            if (user.getUsername().equals(winner)) {
+                user.setMoney(user.getMoney() + jifenchiTotal);
+                userDao.save(user);
+                break;
+            }
+        }
+        return "SUCCESS";
     }
 
     /**
+     * @return void
      * @Author imc700
-     * @Description 所有玩家都减少他投注的钱,赢家也减少投注的钱,然后加上积分池所有的钱
+     * @Description 所有玩家都减少他投注的钱, 赢家也减少投注的钱, 然后加上积分池所有的钱
      * @Date 3:21 下午 2020/3/31
      * @Param [user, winner]
-     * @return void
      **/
-    private int countAndUpdateUser(User user,String winner){
+    private int countAndUpdateUser(User user, String winner) {
         String username = user.getUsername();
         List<Integer> jifens = (List<Integer>) redisUtil.get(username);
         int total = 0;
         for (Integer jifen : jifens) {
-            total+=jifen;
+            total += jifen;
         }
 //        if (!winner.equals(username)) total = total*-1;
-        user.setMoney(user.getMoney()-total);
+        user.setMoney(user.getMoney() - total);
         userDao.save(user);
         return total;
     }

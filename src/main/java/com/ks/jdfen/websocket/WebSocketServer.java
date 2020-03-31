@@ -8,7 +8,6 @@ import com.ks.jdfen.service.UserService;
 import com.ks.jdfen.zha.Player;
 import com.ks.jdfen.zha.WinThreePoker;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -125,6 +124,8 @@ public class WebSocketServer {
         }
     }
 
+    private boolean kaipaiStatus = false;
+
     /**
      * 收到客户端消息后触发的方法
      *
@@ -135,9 +136,10 @@ public class WebSocketServer {
         log.info("来自客户端的消息:" + message);
         //群发消息
         try {
-            if (StringUtils.isEmpty(message)) {
-                return;
-            }
+            if (StringUtils.isEmpty(message)) return;
+            //只要收到消息,就判断tempNameList是否只有两个人,是,则显现,
+            if (!kaipaiStatus)
+                if (judgePlayersCount()==2) sendTheLastTwoPlayerInfo("keyikai");
             //如果给所有人发消息携带@ALL, 给特定人发消息携带@xxx@xxx#message
             String[] split = message.split("#");
             if (split.length > 1) {
@@ -156,8 +158,6 @@ public class WebSocketServer {
                         for (User u : allUser) {
                             redisUtil.del(u.getUsername());
                         }
-
-
                         tempNameList = seatNameList;//开局就把temp设值
                         //接到发牌指令,后台开始发牌,给每个人生成牌并且用map接收
                         list.clear();//这里必须请掉,因为再发牌的时候还不晓得是几个人呢,因为有人可能不玩了.
@@ -191,6 +191,9 @@ public class WebSocketServer {
                         return;
                     } else if (split[1].contains("qipai")) {//弃牌就是从temp里删掉并告诉所有前端该人已弃牌(比如把这个人面前的牌置白)
                         tempNameList.set(tempNameList.indexOf(this.username), "");
+                        if (judgePlayersCount()==1) sendInfo("kaipai:" + kaipai2());;//如果只有俩个人的时候还有一家直接丢牌,就设之后一个人胜利
+                        if (!kaipaiStatus)
+                            if (judgePlayersCount()==2) sendTheLastTwoPlayerInfo("keyikai");
                     } else if (split[1].contains("kaipai")) {//点击开牌的话,
                         sendInfo("kaipai:" + kaipai());
                         return;
@@ -221,6 +224,14 @@ public class WebSocketServer {
         }
     }
 
+    private int judgePlayersCount() {
+        int nowCount=0;
+        for (String player : tempNameList) {
+            if (!StringUtils.isEmpty(player)) nowCount++;
+        }
+        return nowCount;
+    }
+
     private String kaipai() {
         ArrayList<Player> nowPlayers = new ArrayList<>();
         for (Player p : list) {
@@ -230,19 +241,44 @@ public class WebSocketServer {
         try {
             WinThreePoker threePoker = new WinThreePoker(nowPlayers);
             String finalWinnerName = threePoker.judge(nowPlayers);
-
             //此时应该把全局变量全部初始化,让玩家刷新浏览器重新进场并开局
-            onlineCount = 0;
-            list.clear();
-            seatNameList = Arrays.asList("", "", "", "", "", "", "", "");
-            tempNameList = Arrays.asList("", "", "", "", "", "", "", "");//从发牌时初始化这个值.这局他参与了,但是弃牌了就从temp里删掉.
-            seatMoneyList.clear();
-            SecurityUtils.getSubject().getSession().setAttribute("winner",finalWinnerName);
+            initVaris();
             return finalWinnerName;
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
+    }
+
+    /**
+     * 所有人把牌全丢了,那最后一个人直接赢
+     * @return
+     */
+    private String kaipai2() {
+        String finalWinnerName="";
+        try {
+            for (String name : tempNameList) {
+                if (!StringUtils.isEmpty(name)){
+                    finalWinnerName = name;
+                    break;
+                }
+            }
+            initVaris();
+            return finalWinnerName;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private void initVaris() {
+        //此时应该把全局变量全部初始化,让玩家刷新浏览器重新进场并开局
+        onlineCount = 0;
+        list.clear();
+        seatNameList = Arrays.asList("", "", "", "", "", "", "", "");
+        tempNameList = Arrays.asList("", "", "", "", "", "", "", "");//从发牌时初始化这个值.这局他参与了,但是弃牌了就从temp里删掉.
+        seatMoneyList.clear();
+        kaipaiStatus = false;
     }
 
     private void xiazhu(String s) throws IOException {
@@ -296,6 +332,26 @@ public class WebSocketServer {
      */
     public void sendInfo(String message) throws IOException {
         for (WebSocketServer item : users.values()) {
+            try {
+                item.session.getBasicRemote().sendText(message);
+            } catch (IOException e) {
+                continue;
+            }
+        }
+    }
+
+    /**
+     * 开牌时只给最后两个人点亮开牌按钮,而非给在座所有人发
+     */
+    public void sendTheLastTwoPlayerInfo(String message) throws IOException {
+        kaipaiStatus = true;
+        Map<String, WebSocketServer> tempMap = Collections.synchronizedMap(new HashMap());
+        for (String username : users.keySet()) {
+            if (tempNameList.contains(username)) {
+                tempMap.put(username,users.get(username));
+            }
+        }
+        for (WebSocketServer item : tempMap.values()) {
             try {
                 item.session.getBasicRemote().sendText(message);
             } catch (IOException e) {

@@ -47,14 +47,13 @@
 
         function kaipai(key) {//此处的key就是赢家的名字
             $("#"+key).html($("#"+key).html()+"       赢");
-            $.get("/settleAccounts", function (data) {
+            $.get("/authc/settleAccounts/"+key, function (data) {
                 if (data == "SUCCESS") {
-                    window.location.href = "authc/room"
+                    alert(key+"是最后的赢家!积分已结算完毕.")
+                    //此时要用ajax处理一下各玩家的金额,也可以用ajax设置新的房主,方便后续下一轮操作
+                    window.location.reload();//玩完一局让各玩家重新进场,reload可以初始化页面.
                 }
             });
-            alert(key+"是最后的赢家!")
-            //此时要用ajax处理一下各玩家的金额,也可以用ajax设置新的房主,方便后续下一轮操作
-            window.location.reload();//玩完一局让各玩家重新进场,reload可以初始化页面.
         }
 
         //登录过后初始化socket连接
@@ -84,6 +83,8 @@
                     console.log("开始看牌")
                 }else if(hei.indexOf("kanbianse")!=-1){
                     kanbianse(hei.split("bianse")[1],"red");
+                }else if(hei.indexOf("keyikai")!=-1){
+                    $("#kaipai").show();
                 }else if(hei.indexOf("qipai")!=-1){
                     kanbianse(hei.split(":")[0],"white");
                 }else if(hei.indexOf("kaipai")!=-1){
@@ -93,6 +94,7 @@
                 }else if(hei.indexOf(": zhunbeixia")!=-1){
                     $("#xiazhu").toggle();
                     $("#xiazhumoney").toggle();
+                    $("#qipai").toggle();
                 }else if(hei.indexOf("shangzuo")!=-1){
                     var sz0 = hei.split("#")[1];
                     var money0 = hei.split("#")[2];
@@ -142,11 +144,6 @@
         };
 
         function fapai() {
-            // $(".icons").fadeIn(4000);
-            // $(".icona").fadeIn(4000);
-            // $(".iconb").fadeIn(4000);
-            // $(".iconc").fadeIn(4000);
-
             //只有座位上有名字的人,发牌的话,才把牌显示出来
             for (var i = 0; i < seats.length; i++){
                 if ($("." + seats[i]).html().indexOf("::") != -1){
@@ -194,6 +191,7 @@
         function record(){
             $("#xiazhumoney").toggle();
             $("#xiazhu").toggle();//下注完就把下注按钮和下注金额框隐藏掉,然后记录下
+            $("#qipai").toggle();//让弃牌按钮和下注按钮一起出现
             //任何人点击下注的话,要把下注金额存起来,因为要让所有人看到所以要发消息
             send('hxxiazhu'+$("#xiazhumoney").val());
             // $("#"+userId).html($("#"+userId).html()+$("#xiazhumoney").html()+",")
@@ -311,6 +309,7 @@
             text-align:center;
             vertical-align: middle;
             line-height: 30px;
+            display:none;
         }
 
         .icon11 {
@@ -324,6 +323,7 @@
             text-align:center;
             vertical-align: middle;
             line-height: 30px;
+            display:none;
         }
 
         .xiazhu {

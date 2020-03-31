@@ -27,10 +27,10 @@ spring:
     timeout: 5000
     password: ss1111
     port: 6379
-    jedis:
-      pool:
-        max-idle: -1
-        min-idle: 0
-        max-active: 2000
-        max-wait: -1
+#    jedis:
+#      pool:
+#        max-idle: -1
+#        min-idle: 0
+#        max-active: 2000
+#        max-wait: -1
     database: 1
