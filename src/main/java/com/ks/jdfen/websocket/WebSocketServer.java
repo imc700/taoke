@@ -82,6 +82,8 @@ public class WebSocketServer {
             getMoneyListByNames(seatNameList);
             sendInfo("shangzuo#" + seatNameList + "#" + seatMoneyList);//只要是让所有人的桌面UI发生变化,就要通信
             sendInfo(username + "加入！当前在线人数为" + getOnlineCount() + ",分别是" + getAllNames());
+            //告诉刚进来的人自己坐哪个位置上
+            sendMessageToSomeBody(this.username, "whoami#" +this.username);
         } catch (IOException e) {
             log.error("websocket IO异常");
         }
@@ -143,21 +145,15 @@ public class WebSocketServer {
             //如果给所有人发消息携带@ALL, 给特定人发消息携带@xxx@xxx#message
             String[] split = message.split("#");
             if (split.length > 1) {
-                String[] split1 = split[0].split("@");
-                if (split1.length < 2) {
-                    return;
-                }
-                String firstuser = split1[1].trim();
-
-
                 //暂时肯定是给所有发送消息
-                if (StringUtils.isEmpty(firstuser) || "ALL".equals(firstuser.toUpperCase())) {
+                if (message.contains("ALL")) {
                     if (split[1].contains("fapai")) {
                         //发牌的时候把上一局的下注记录都删除掉.因为上一局已经结算了.
-                        List<User> allUser = userDao.findAll();
-                        for (User u : allUser) {
-                            redisUtil.del(u.getUsername());
-                        }
+//                        List<User> allUser = userDao.findAll();
+//                        for (User u : allUser) {
+//                            redisUtil.del(u.getUsername());
+//                        }
+                        redisUtil.flushdb();
                         tempNameList = seatNameList;//开局就把temp设值
                         //接到发牌指令,后台开始发牌,给每个人生成牌并且用map接收
                         list.clear();//这里必须请掉,因为再发牌的时候还不晓得是几个人呢,因为有人可能不玩了.
@@ -202,7 +198,7 @@ public class WebSocketServer {
                     sendInfo(msg);//群发消息
 
                 } else {//给特定人员发消息
-                    for (String user : split1) {
+                    String user = split[0].substring(1);
                         if (!StringUtils.isEmpty(user.trim())) {
                             if ("kanpai".equals(split[1])) {//如果是某人要看牌,就从list里把他的牌挑出来给前台
                                 for (Player p : list) {
@@ -214,7 +210,7 @@ public class WebSocketServer {
 
 
                         }
-                    }
+
                 }
             } else {
                 sendInfo(username + ": " + message);

@@ -1,6 +1,9 @@
 package com.ks.jdfen.myutil;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
@@ -567,5 +570,14 @@ public final class RedisUtil {
             e.printStackTrace();
             return 0;
         }
+    }
+
+    public void flushdb() {
+        redisTemplate.execute(new RedisCallback<Object>() {
+            public String doInRedis(RedisConnection connection) throws DataAccessException {
+                connection.flushDb();
+                return "ok";
+            }
+        });
     }
 }

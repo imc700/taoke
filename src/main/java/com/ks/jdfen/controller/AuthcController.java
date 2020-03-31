@@ -37,7 +37,7 @@ public class AuthcController {
     @RequestMapping("/settleAccounts/{winner}")
     public String settleAccounts(@PathVariable("winner") String winner) {
         int jifenchiTotal = 0;
-        List<User> users = userDao.findAll();
+        List<User> users = userDao.findAll();//此处可优化成只查user表而非role和permission都关联查询出来
         for (String key : redisUtil.keys("*")) {
             for (User user : users) {
                 //每个人都结算下并存入数据库
