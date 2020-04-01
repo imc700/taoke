@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.springframework.org/schema/mvc"
-      xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<html lang="en" xmlns:th="http://www.springframework.org/schema/mvc" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 
 <head>
     <meta charset="UTF-8">
@@ -9,7 +8,7 @@
     <script th:inline="javascript">
         // ip = "116.63.138.138:8089";
         ip = "localhost:8089";
-        seats = ["icon1","icon5","icon6","icon3","icon4","icon8","icon7","icon2"]
+        seats = ["icon1", "icon5", "icon6", "icon3", "icon4", "icon8", "icon7", "icon2"]
         var userId = [[${ userId }]];
         console.log(userId)
         var socket;
@@ -17,30 +16,53 @@
 
         function addRecord(names) {
             $("#xiafang").html(xiafangHtml);
-            for (var i = names.length-1; i >=0; i--){
-                if (names[i].trim()!=""){
-                    var addHtml = "<textarea id=\""+names[i].trim()+"\" style=\"width: 675px;height: 15px\">"+names[i].trim()+"下注:</textarea><br/>"
-                    $("#xiafang").html(addHtml+$("#xiafang").html())
+            for (var i = names.length - 1; i >= 0; i--) {
+                if (names[i].trim() != "") {
+                    var addHtml = "<textarea id=\"" + names[i].trim() + "\" style=\"width: 675px;height: 15px\">" + names[i].trim() + "下注:</textarea><br/>"
+                    $("#xiafang").html(addHtml + $("#xiafang").html())
                 }
             }
 
         }
 
-        function showMoney(jsonMoneys) {
+
+
+        function showMoney(who, jsonMoneys) {
+
+            var nowName = (who + "").trim();
+            for (var i = 0; i < seats.length; i++) {
+                var divs = $("." + seats[i]).children("div");
+                if ($("." + seats[i]).html().indexOf((nowName + "").trim()) != -1) {
+                    var dingshidiv = divs.eq(divs.length - 1)
+                    dingshidiv.show();
+
+                    var num =10
+                    var timer = setInterval(function(){
+                        dingshidiv.html(num);
+                        num--;
+                        if(num<=0){
+                            clearInterval(timer);
+                        }
+                    },1000)
+
+                } else divs.eq(divs.length - 1).hide();
+            }
+
+
             var personMoneyList = JSON.parse(jsonMoneys);
             console.log(personMoneyList)
-            for(var key in personMoneyList){
-                $("#"+key).html(key+"下注:"+personMoneyList[key])
+            for (var key in personMoneyList) {
+                $("#" + key).html(key + "下注:" + personMoneyList[key])
             }
             //其实当前时间的积分池金额就是json里面的各数组金额之和
-            $("#jifenchi").html("积分池:"+getNowAllMoney(personMoneyList))
+            $("#jifenchi").html("积分池:" + getNowAllMoney(personMoneyList))
         }
 
         function getNowAllMoney(personMoneyList) {
-            var nowAllMoney=0;
-            for(var key in personMoneyList){
-                for (var i=0;i< personMoneyList[key].length;i++){
-                    nowAllMoney+=personMoneyList[key][i];
+            var nowAllMoney = 0;
+            for (var key in personMoneyList) {
+                for (var i = 0; i < personMoneyList[key].length; i++) {
+                    nowAllMoney += personMoneyList[key][i];
                 }
             }
             return nowAllMoney;
@@ -48,30 +70,51 @@
 
 
         function kaipai(key) {//此处的key就是赢家的名字
-            $("#"+key).html($("#"+key).html()+"       赢");
-            $.get("/authc/settleAccounts/"+key, function (data) {
+            $("#" + key).html($("#" + key).html() + "       赢");
+            $.get("/authc/settleAccounts/" + key, function (data) {
                 if (data == "SUCCESS") {
-                    alert(key+"是最后的赢家!积分已结算完毕.")
+                    alert(key + "是最后的赢家!积分已结算完毕.")
                     //此时要用ajax处理一下各玩家的金额,也可以用ajax设置新的房主,方便后续下一轮操作
                     window.location.reload();//玩完一局让各玩家重新进场,reload可以初始化页面.
                 }
             });
         }
 
-        function judgeIfShowKai() {
+        function judgeIfShowKai() {//给特定人员发送消息:imc700@admin: zhunbeixia
+            // if (hei!=undefined){
+            //     var nowName = (hei+"").split(":")[0].split("@")[1].trim()
+            //     if ($("#xiazhu").is(":visible")) {
+            //         for (var i = 0; i < seats.length; i++) {
+            //             if ($("." + seats[i]).html().indexOf((nowName+"").trim()) != -1) {
+            //                 var divs = $("." + seats[i]).children("div");
+            //                 divs.eq(divs.length-1).show();
+            //             }
+            //         }
+            //     } else {
+            //         for (var i = 0; i < seats.length; i++) {
+            //             if ($("." + seats[i]).html().indexOf((nowName+"").trim()) != -1) {
+            //                 var divs = $("." + seats[i]).children("div");
+            //                 divs.eq(divs.length-1).hide();
+            //             }
+            //         }
+            //     }
+            // }
+
+
             if (keyikai) {
-                if($("#xiazhu").is(":visible")){
+                if ($("#xiazhu").is(":visible")) {
                     $("#kaipai").show();
-                }else{
+                } else {
                     $("#kaipai").hide();
                 }
             }
         }
 
+
         function whoami(myName) {
-            for (var i = 0; i < seats.length; i++){
-                if ($("." + seats[i]).html().indexOf(myName) != -1){
-                    $("." + seats[i]).css("background-color","white");
+            for (var i = 0; i < seats.length; i++) {
+                if ($("." + seats[i]).html().indexOf(myName) != -1) {
+                    $("." + seats[i]).css("background-color", "white");
                     break;
                 }
             }
@@ -85,7 +128,7 @@
                 console.log("您的浏览器支持WebSocket/websocket");
             }
             //socket连接地址: 注意是ws协议
-            socket = new WebSocket("ws://"+ ip +"/websocket/" + userId);
+            socket = new WebSocket("ws://" + ip + "/websocket/" + userId);
             // socket = new WebSocket("ws://./websocket/" + userId);
             socket.onopen = function () {
                 console.log("Socket 已打开，並找个位置坐下,以及初始化记录表");
@@ -93,44 +136,43 @@
             //获得消息事件
             socket.onmessage = function (msg) {
                 console.log(msg)
-                hei = msg.data+""
-                if (hei.indexOf("fapai")!=-1){
+                hei = msg.data + ""
+                if (hei.indexOf("fapai") != -1) {
                     fapai();
                     console.log("开始发牌")
                     $('#fapai').hide();
                     $('#kanpai').show();
-                }else if(hei.indexOf("kanpai")!=-1){//牌面由后台传给该兄弟
+                } else if (hei.indexOf("kanpai") != -1) {//牌面由后台传给该兄弟
                     kanpai(hei.split("#")[1]);
                     console.log("开始看牌")
-                }else if(hei.indexOf("kanbianse")!=-1){
-                    kanbianse(hei.split("bianse")[1],"red");
-                }else if(hei.indexOf("keyikai")!=-1){
+                } else if (hei.indexOf("kanbianse") != -1) {
+                    kanbianse(hei.split("bianse")[1], "red");
+                } else if (hei.indexOf("keyikai") != -1) {
                     keyikai = true;
                     judgeIfShowKai();
-                }else if(hei.indexOf("qipai")!=-1){
-                    kanbianse(hei.split(":")[0],"white");
-                }else if(hei.indexOf("kaipai")!=-1){
+                } else if (hei.indexOf("qipai") != -1) {
+                    kanbianse(hei.split(":")[0], "white");
+                } else if (hei.indexOf("kaipai") != -1) {
                     kaipai(hei.split(":")[1]);
-                }else if(hei.indexOf("whoami")!=-1){
+                } else if (hei.indexOf("whoami") != -1) {
                     whoami(hei.split("#")[1]);
-                }else if(hei.indexOf("yixiazhu")!=-1){//下注后把所有人的投注信息返回并显示
-                    showMoney(hei.split("xiazhu")[1]);
-                }else if(hei.indexOf(": zhunbeixia")!=-1){
+                } else if (hei.indexOf("yixiazhu") != -1) {//下注后把所有人的投注信息返回并显示
+                    showMoney(hei.split("yixiazhu")[0], hei.split("xiazhu")[1]);
+                } else if (hei.indexOf(": zhunbeixia") != -1) {
                     $("#xiazhu").toggle();
                     $("#xiazhumoney").toggle();
                     $("#qipai").toggle();
                     judgeIfShowKai();
-                }else if(hei.indexOf("shangzuo")!=-1){
+                } else if (hei.indexOf("shangzuo") != -1) {
                     var sz0 = hei.split("#")[1];
                     var money0 = hei.split("#")[2];
-                    var peopleOfSeats = sz0.substring(1,sz0.length-1).split(",");
-                    var moneyOfSeats = money0.substring(1,money0.length-1).split(",");
+                    var peopleOfSeats = sz0.substring(1, sz0.length - 1).split(",");
+                    var moneyOfSeats = money0.substring(1, money0.length - 1).split(",");
                     console.log(peopleOfSeats);
-                    takeAseat(peopleOfSeats,moneyOfSeats)
+                    takeAseat(peopleOfSeats, moneyOfSeats)
                     //玩家上位后把计分处也相应重排
                     addRecord(peopleOfSeats);
-                }
-                else{
+                } else {
                     var histroy = $("#history").val();
                     $("#history").val(histroy + "\r\n" + msg.data);
                     console.log($(msg));
@@ -148,14 +190,15 @@
                 socket.close();
             });
         }
+
         //点击按钮发送消息,指定某人和给所有人发送执行命令和发消息有具体格式要求
         function send(msg) {
-            msg=msg+""
-            if (msg.indexOf("zhiding")!=-1){
-                socket.send("@"+ userId+"#"+ msg.split("#")[1]);
-            } else if (msg.startsWith("hx")){
+            msg = msg + ""
+            if (msg.indexOf("zhiding") != -1) {
+                socket.send("@" + userId + "#" + msg.split("#")[1]);
+            } else if (msg.startsWith("hx")) {
                 socket.send('@ALL#' + msg);
-            }else{
+            } else {
                 console.log("发送消息: " + $("#msg").val());
                 socket.send("@ALL#" + $("#msg").val());
                 $("#msg").val("");
@@ -163,72 +206,74 @@
 
         }
 
-        var sleep = function(time) {
+        var sleep = function (time) {
             var startTime = new Date().getTime() + parseInt(time, 10);
-            while(new Date().getTime() < startTime) {}
+            while (new Date().getTime() < startTime) {
+            }
         };
 
         function fapai() {
             //只有座位上有名字的人,发牌的话,才把牌显示出来
-            for (var i = 0; i < seats.length; i++){
-                if ($("." + seats[i]).html().indexOf("::") != -1){
-                    var divs = $("."+seats[i]).children("div");
-                    for (var j = 0; j < divs.length; j++) {
+            for (var i = 0; i < seats.length; i++) {
+                if ($("." + seats[i]).html().indexOf("::") != -1) {
+                    var divs = $("." + seats[i]).children("div");
+                    for (var j = 0; j < divs.length - 1; j++) {
                         divs.eq(j).fadeIn(4000);
                     }
                 }
             }
         }
+
         function kanpai(pai3) {
             // $("#paimian").html(pai3);
             $("#kanpai").html(pai3);
-            $("#kanpai").css("background-color","white");
-            send('hxkanbianse'+userId);
+            $("#kanpai").css("background-color", "white");
+            send('hxkanbianse' + userId);
         }
 
-        function kanbianse(whopankai,yanse) {
+        function kanbianse(whopankai, yanse) {
             //既然看了牌,就把自己面前的牌弄成红色,高速其他玩家已看牌,表示危险
-            for (var i = 0; i < seats.length; i++){
-                if ($("." + seats[i]).html().indexOf(whopankai) != -1){
-                    var divs = $("."+seats[i]).children("div");
-                    for (var j = 0; j < divs.length; j++) {
-                        divs.eq(j).css("background-color",yanse)
+            for (var i = 0; i < seats.length; i++) {
+                if ($("." + seats[i]).html().indexOf(whopankai) != -1) {
+                    var divs = $("." + seats[i]).children("div");
+                    for (var j = 0; j < divs.length - 1; j++) {
+                        divs.eq(j).css("background-color", yanse)
                     }
                     break;
                 }
             }
         }
 
-        function takeAseat(sz,moneysz){
-            for (var i = 0; i < seats.length; i++){
+        function takeAseat(sz, moneysz) {
+            for (var i = 0; i < seats.length; i++) {
                 //先把有名字的座位还原,然后再分配座位
-                    $("."+seats[i]).html(seatHtmls[i]);
-                }
+                $("." + seats[i]).html(seatHtmls[i]);
+            }
 
-            for (var i = 0; i < seats.length; i++){
-                if (sz[i].trim() != ""){
+            for (var i = 0; i < seats.length; i++) {
+                if (sz[i].trim() != "") {
                     if ($("." + seats[i]).html().indexOf("::") == -1)
-                        $("."+seats[i]).html(sz[i]+ "::"+moneysz[i]+$("."+seats[i]).html())
+                        $("." + seats[i]).html(sz[i] + "::" + moneysz[i] + $("." + seats[i]).html())
                 }
             }
         }
 
-        function record(){
+        function record() {
             $("#xiazhumoney").toggle();
             $("#xiazhu").toggle();//下注完就把下注按钮和下注金额框隐藏掉,然后记录下
             $("#qipai").toggle();//让弃牌按钮和下注按钮一起出现
             judgeIfShowKai();
             //任何人点击下注的话,要把下注金额存起来,因为要让所有人看到所以要发消息
-            send('hxxiazhu'+$("#xiazhumoney").val());
+            send('hxxiazhu' + $("#xiazhumoney").val());
             // $("#"+userId).html($("#"+userId).html()+$("#xiazhumoney").html()+",")
         }
 
         seatHtmls = []
-        xiafangHtml=''
+        xiafangHtml = ''
         //某人登录后就直接新建websocket进行通信
         $(document).ready(function () {
-            for (var i = 0; i < seats.length; i++){
-                seatHtmls.push($("."+seats[i]).html())
+            for (var i = 0; i < seats.length; i++) {
+                seatHtmls.push($("." + seats[i]).html())
             }
             xiafangHtml = $("#xiafang").html()
             initSocket(userId);
@@ -243,6 +288,71 @@
             top: 18px;
             left: 120px;
         }
+
+        .icon1-timebox {
+            position: absolute;
+            left: 50%;
+            transform: translate(-50%, 0);
+            bottom: -50px;
+            display: none;
+        }
+
+        .icon2-timebox {
+            position: absolute;
+            left: 50%;
+            transform: translate(-50%, 0);
+            bottom: -50px;
+            display: none;
+        }
+
+        .icon3-timebox {
+            position: absolute;
+            left: 50%;
+            transform: translate(-50%, 0);
+            top: -50px;
+            display: none;
+        }
+
+        .icon4-timebox {
+            position: absolute;
+            left: 50%;
+            transform: translate(-50%, 0);
+            top: -50px;
+            display: none;
+        }
+
+        .icon5-timebox {
+            position: absolute;
+            top: 50%;
+            transform: translate(0, -50%);
+            right: -50px;
+            display: none;
+        }
+
+        .icon6-timebox {
+            position: absolute;
+            top: 50%;
+            transform: translate(0, -50%);
+            right: -50px;
+            display: none;
+        }
+
+        .icon7-timebox {
+            position: absolute;
+            top: 50%;
+            transform: translate(0, -50%);
+            left: -50px;
+            display: none;
+        }
+
+        .icon8-timebox {
+            position: absolute;
+            top: 50%;
+            transform: translate(0, -50%);
+            left: -50px;
+            display: none;
+        }
+
 
         .icon2 {
             width: 110px;
@@ -315,7 +425,7 @@
             left: 50%;
             top: 50%;
             transform: translate(-50%, -50%);
-            text-align:center;
+            text-align: center;
             vertical-align: middle;
             line-height: 30px;
             /* left: 50%;
@@ -332,10 +442,10 @@
             left: 75%;
             top: 50%;
             transform: translate(-50%, -50%);
-            text-align:center;
+            text-align: center;
             vertical-align: middle;
             line-height: 30px;
-            display:none;
+            display: none;
         }
 
         .icon11 {
@@ -346,10 +456,10 @@
             left: 25%;
             top: 50%;
             transform: translate(-50%, -50%);
-            text-align:center;
+            text-align: center;
             vertical-align: middle;
             line-height: 30px;
-            display:none;
+            display: none;
         }
 
         .xiazhu {
@@ -360,10 +470,10 @@
             left: 55%;
             top: 75%;
             transform: translate(-50%, -50%);
-            text-align:center;
+            text-align: center;
             vertical-align: middle;
             line-height: 30px;
-            display:none;
+            display: none;
         }
 
         .xiazhumoney {
@@ -374,10 +484,10 @@
             left: 45%;
             top: 75%;
             transform: translate(-50%, -50%);
-            text-align:center;
+            text-align: center;
             vertical-align: middle;
             line-height: 30px;
-            display:none;
+            display: none;
         }
 
         .jifenchi {
@@ -388,7 +498,7 @@
             left: 50%;
             top: 25%;
             transform: translate(-50%, -50%);
-            text-align:center;
+            text-align: center;
             vertical-align: middle;
             line-height: 30px;
         }
@@ -400,7 +510,7 @@
             position: absolute;
             top: 40px;
             left: 20px;
-            display:none;
+            display: none;
         }
 
         .icona {
@@ -410,7 +520,7 @@
             position: absolute;
             bottom: 40px;
             left: 20px;
-            display:none;
+            display: none;
         }
 
         .iconb {
@@ -420,7 +530,7 @@
             position: absolute;
             top: 20px;
             left: 40px;
-            display:none;
+            display: none;
         }
 
         .iconc {
@@ -430,7 +540,7 @@
             position: absolute;
             top: 20px;
             right: 40px;
-            display:none;
+            display: none;
         }
     </style>
 </head>
@@ -449,56 +559,75 @@
     <div style="border: 1px solid red;
         width: 675px;height: 300px;margin-left: 40px;
     margin-top: 50px;border-radius: 10px;position: relative;">
-        <div class="jifenchi" id="jifenchi" onclick="" >积分池:0</div>
-        <shiro:hasPermission name="kanpai"><div class="icon9" id="kanpai" onclick="send('zhiding#' +'kanpai')" hidden>看牌</div></shiro:hasPermission>
-        <shiro:hasPermission name="fapai"><div class="icon9" id="fapai" onclick="send('hxfapai');" >发牌</div></shiro:hasPermission>
-        <div class="icon11" id="qipai" onclick="$('#xiazhumoney').val(0); record();send('hxqipai');" >弃牌</div>
-        <div class="icon10" id="kaipai" onclick="send('hxkaipai');" >开牌</div>
-        <input type="text" id="xiazhumoney" class="xiazhumoney" value="1" />
-        <div class="xiazhu" id="xiazhu" onclick="record()" >下注</div>
+        <div class="jifenchi" id="jifenchi" onclick="">积分池:0</div>
+        <shiro:hasPermission name="kanpai">
+            <div class="icon9" id="kanpai" onclick="send('zhiding#' +'kanpai')" hidden>看牌</div>
+        </shiro:hasPermission>
+        <shiro:hasPermission name="fapai">
+            <div class="icon9" id="fapai" onclick="send('hxfapai');">发牌</div>
+        </shiro:hasPermission>
+        <div class="icon11" id="qipai" onclick="$('#xiazhumoney').val(0); record();send('hxqipai');">弃牌</div>
+        <div class="icon10" id="kaipai" onclick="send('hxkaipai');">开牌</div>
+        <input type="text" id="xiazhumoney" class="xiazhumoney" value="1"/>
+        <div class="xiazhu" id="xiazhu" onclick="record()">下注</div>
 
     </div>
     <div class="icon1">
         <div class="icons"></div>
         <div class="icons" style="margin-left: 20px;"></div>
         <div class="icons" style="margin-left: 40px;"></div>
-<!--        <div class="xiazhu" style="margin-left: 40px;"><input class="xiazhu" type="text" /><input type="button" value="下注" onclick="xiazhu()" /></div>-->
+        <div class="icon1-timebox">10</div>
+        <!--        <div class="xiazhu" style="margin-left: 40px;"><input class="xiazhu" type="text" /><input type="button" value="下注" onclick="xiazhu()" /></div>-->
 
     </div>
     <div class="icon2">
         <div class="icons"></div>
         <div class="icons" style="margin-left: 20px;"></div>
         <div class="icons" style="margin-left: 40px;"></div>
+        <div class="icon2-timebox">10</div>
+
     </div>
     <div class="icon3">
         <div class="icona"></div>
         <div class="icona" style="margin-left: 20px;"></div>
         <div class="icona" style="margin-left: 40px;"></div>
+        <div class="icon3-timebox">10</div>
+
     </div>
     <div class="icon4">
         <div class="icona"></div>
         <div class="icona" style="margin-left: 20px;"></div>
         <div class="icona" style="margin-left: 40px;"></div>
+        <div class="icon4-timebox">10</div>
+
     </div>
     <div class="icon5">
         <div class="iconb"></div>
         <div class="iconb" style="margin-top: 20px;"></div>
         <div class="iconb" style="margin-top: 40px;"></div>
+        <div class="icon5-timebox">10</div>
+
     </div>
     <div class="icon6">
         <div class="iconb"></div>
         <div class="iconb" style="margin-top: 20px;"></div>
         <div class="iconb" style="margin-top: 40px;"></div>
+        <div class="icon6-timebox">10</div>
+
     </div>
     <div class="icon7">
         <div class="iconc"></div>
         <div class="iconc" style="margin-top: 20px;"></div>
         <div class="iconc" style="margin-top: 40px;"></div>
+        <div class="icon7-timebox">10</div>
+
     </div>
     <div class="icon8">
         <div class="iconc"></div>
         <div class="iconc" style="margin-top: 20px;"></div>
         <div class="iconc" style="margin-top: 40px;"></div>
+        <div class="icon8-timebox">10</div>
+
     </div>
 
 </div>

@@ -170,14 +170,15 @@ public class WebSocketServer {
                             poker.startPlayingCards();
                             list = poker.getPlayers();
                             //发牌完后让下家开始下注
-                            sendMessageToSomeBody(nextPlayerName(), "zhunbeixia");
-                            System.out.println("####################" + nextPlayerName());
+                            String nextPlayerName = nextPlayerName();
+                            sendMessageToSomeBody(nextPlayerName, "zhunbeixia");
+                            System.out.println("####################" + nextPlayerName);
                             //底子都下了,然后就是在前台刷新下注记录
                             Map<String, List> map = new HashMap<>();
                             for (String key : redisUtil.keys("*")) {
                                 map.put(key, (List<Integer>) redisUtil.get(key));
                             }
-                            sendInfo("yixiazhu" + JSON.toJSONString(map));
+                            sendInfo(nextPlayerName+"yixiazhu" + JSON.toJSONString(map));
                         } catch (Exception e) {
                             sendInfo("exception:" + e.getMessage());
                             return;
@@ -292,10 +293,11 @@ public class WebSocketServer {
         for (String key : redisUtil.keys("*")) {
             map.put(key, (List<Integer>) redisUtil.get(key));
         }
-        sendInfo("yixiazhu" + JSON.toJSONString(map));
+        sendInfo(nextPlayerName()+"yixiazhu" + JSON.toJSONString(map));
         //并告诉下一个人要显示下注按钮了
-        System.out.println("轮到" + nextPlayerName() + "下注了...");
-        sendMessageToSomeBody(nextPlayerName(), "zhunbeixia");
+        String nextPlayerName = nextPlayerName();
+        System.out.println("轮到" + nextPlayerName+ "下注了...");
+        sendMessageToSomeBody(nextPlayerName, "zhunbeixia");
     }
 
     private String nextPlayerName() {
