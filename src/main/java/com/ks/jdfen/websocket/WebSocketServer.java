@@ -53,6 +53,7 @@ public class WebSocketServer {
     private static List<Integer> seatMoneyList = new ArrayList<>();
     //创建一个线程安全的map
     private static Map<String, WebSocketServer> users = Collections.synchronizedMap(new HashMap());
+    private static Map<String, Boolean> kanpaiusers = Collections.synchronizedMap(new HashMap());
 
     //与某个客户端的连接会话，需要通过它来给客户端发送数据
     private Session session;
@@ -204,6 +205,8 @@ public class WebSocketServer {
                             if ("kanpai".equals(split[1])) {//如果是某人要看牌,就从list里把他的牌挑出来给前台
                                 for (Player p : list) {
                                     if (p.getName().equals(user)) {
+                                        //后台记住这个人看牌了
+                                        kanpaiusers.put(user.trim(), true);
                                         sendMessageToSomeBody(user.trim(), "kanpai#" + p.getPlayerCards().toString());
                                     }
                                 }
@@ -276,6 +279,7 @@ public class WebSocketServer {
         tempNameList = Arrays.asList("", "", "", "", "", "", "", "");//从发牌时初始化这个值.这局他参与了,但是弃牌了就从temp里删掉.
         seatMoneyList.clear();
         kaipaiStatus = false;
+        kanpaiusers.clear();
     }
 
     private void xiazhu(String s) throws IOException {
@@ -296,8 +300,22 @@ public class WebSocketServer {
         sendInfo(nextPlayerName()+"yixiazhu" + JSON.toJSONString(map));
         //并告诉下一个人要显示下注按钮了
         String nextPlayerName = nextPlayerName();
-        System.out.println("轮到" + nextPlayerName+ "下注了...");
-        sendMessageToSomeBody(nextPlayerName, "zhunbeixia");
+        int nextManMoney = judgeNextManMoney(money);
+        System.out.println("轮到" + nextPlayerName+ "下注了...下注金额默认为"+nextManMoney);
+        sendMessageToSomeBody(nextPlayerName, "zhunbeixia"+nextManMoney);
+    }
+
+    public int judgeNextManMoney(int money){
+        String nextPlayerName = nextPlayerName();
+        //如果当前下注人没看牌
+        if (!kanpaiusers.containsKey(this.username)){
+            //下家也没看牌
+            if (!kanpaiusers.containsKey(nextPlayerName)) return money;
+            else return money*2;
+        }else {
+            if (!kanpaiusers.containsKey(nextPlayerName)) return money/2;
+            else return money;
+        }
     }
 
     private String nextPlayerName() {

@@ -144,7 +144,8 @@
                     $('#kanpai').show();
                 } else if (hei.indexOf("kanpai") != -1) {//牌面由后台传给该兄弟
                     kanpai(hei.split("#")[1]);
-                    console.log("开始看牌")
+                    console.log("开始看牌");
+                    $("#xiazhumoney").val($("#xiazhumoney").val()/1*2);
                 } else if (hei.indexOf("kanbianse") != -1) {
                     kanbianse(hei.split("bianse")[1], "red");
                 } else if (hei.indexOf("keyikai") != -1) {
@@ -163,6 +164,8 @@
                     $("#xiazhumoney").toggle();
                     $("#qipai").toggle();
                     judgeIfShowKai();
+                    //把上一个下注的人的下注金额直接放到这轮下注的人的下注框里
+                    $("#xiazhumoney").val(hei.split("zhunbeixia")[1]+"");
                 } else if (hei.indexOf("shangzuo") != -1) {
                     var sz0 = hei.split("#")[1];
                     var money0 = hei.split("#")[2];
@@ -567,7 +570,7 @@
             <div class="icon9" id="fapai" onclick="send('hxfapai');">发牌</div>
         </shiro:hasPermission>
         <div class="icon11" id="qipai" onclick="$('#xiazhumoney').val(0); record();send('hxqipai');">弃牌</div>
-        <div class="icon10" id="kaipai" onclick="send('hxkaipai');">开牌</div>
+        <div class="icon10" id="kaipai" onclick="send('hxxiazhu' + $('#xiazhumoney').val());send('hxkaipai');">开牌</div>
         <input type="text" id="xiazhumoney" class="xiazhumoney" value="1"/>
         <div class="xiazhu" id="xiazhu" onclick="record()">下注</div>
 
