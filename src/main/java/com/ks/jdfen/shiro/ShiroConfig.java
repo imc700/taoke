@@ -31,9 +31,9 @@ public class ShiroConfig {
 
         filterChainDefinitionMap.put("/*", "anon");
         filterChainDefinitionMap.put("/authc/*", "authc");
-        filterChainDefinitionMap.put("/authc/admin", "roles[admin]");
-        filterChainDefinitionMap.put("/authc/renewable", "perms[Create,Update]");
-        filterChainDefinitionMap.put("/authc/removable", "perms[Delete]");
+        filterChainDefinitionMap.put("/authc/chongzhi", "roles[admin]");
+//        filterChainDefinitionMap.put("/authc/renewable", "perms[Create,Update]");
+//        filterChainDefinitionMap.put("/authc/removable", "perms[Delete]");
         shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);
         return shiroFilterFactoryBean;
     }

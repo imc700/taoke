@@ -2,6 +2,7 @@ package com.ks.jdfen.websocket;
 
 import com.alibaba.fastjson.JSON;
 import com.ks.jdfen.Entity.User;
+import com.ks.jdfen.controller.AuthcController;
 import com.ks.jdfen.dao.UserDao;
 import com.ks.jdfen.myutil.RedisUtil;
 import com.ks.jdfen.service.UserService;
@@ -36,6 +37,13 @@ public class WebSocketServer {
     @Autowired
     public void setUserService(UserService userService) {
         WebSocketServer.userService = userService;
+    }
+
+    private static AuthcController authcController;
+
+    @Autowired
+    public void setAuthcController(AuthcController authcController) {
+        WebSocketServer.authcController = authcController;
     }
 
     private static UserDao userDao;
@@ -84,7 +92,7 @@ public class WebSocketServer {
             sendInfo("shangzuo#" + seatNameList + "#" + seatMoneyList);//只要是让所有人的桌面UI发生变化,就要通信
             sendInfo(username + "加入！当前在线人数为" + getOnlineCount() + ",分别是" + getAllNames());
             //告诉刚进来的人自己坐哪个位置上
-            sendMessageToSomeBody(this.username, "whoami#" +this.username);
+            sendMessageToSomeBody(this.username, "whoami#" + this.username);
         } catch (IOException e) {
             log.error("websocket IO异常");
         }
@@ -142,7 +150,7 @@ public class WebSocketServer {
             if (StringUtils.isEmpty(message)) return;
             //只要收到消息,就判断tempNameList是否只有两个人,是,则显现,
             if (!kaipaiStatus)
-                if (judgePlayersCount()==2) sendTheLastTwoPlayerInfo("keyikai");
+                if (judgePlayersCount() == 2) sendTheLastTwoPlayerInfo("keyikai");
             //如果给所有人发消息携带@ALL, 给特定人发消息携带@xxx@xxx#message
             String[] split = message.split("#");
             if (split.length > 1) {
@@ -179,7 +187,7 @@ public class WebSocketServer {
                             for (String key : redisUtil.keys("*")) {
                                 map.put(key, (List<Integer>) redisUtil.get(key));
                             }
-                            sendInfo(nextPlayerName+"yixiazhu" + JSON.toJSONString(map));
+                            sendInfo(nextPlayerName + "yixiazhu" + JSON.toJSONString(map));
                         } catch (Exception e) {
                             sendInfo("exception:" + e.getMessage());
                             return;
@@ -188,12 +196,20 @@ public class WebSocketServer {
                         xiazhu(split[1]);
                         return;
                     } else if (split[1].contains("qipai")) {//弃牌就是从temp里删掉并告诉所有前端该人已弃牌(比如把这个人面前的牌置白)
+                        System.out.println(this.username+"弃牌了-------------------------------");
                         tempNameList.set(tempNameList.indexOf(this.username), "");
-                        if (judgePlayersCount()==1) sendInfo("kaipai:" + kaipai2());;//如果只有俩个人的时候还有一家直接丢牌,就设之后一个人胜利
+                        if (judgePlayersCount() == 1) {
+                            String winner = kaipai2();
+                            sendInfo("kaipai:" + winner);
+                            authcController.settleAccounts(winner.trim());
+                        }
+                        //如果只有俩个人的时候还有一家直接丢牌,就设之后一个人胜利
                         if (!kaipaiStatus)
-                            if (judgePlayersCount()==2) sendTheLastTwoPlayerInfo("keyikai");
+                            if (judgePlayersCount() == 2) sendTheLastTwoPlayerInfo("keyikai");
                     } else if (split[1].contains("kaipai")) {//点击开牌的话,
-                        sendInfo("kaipai:" + kaipai());
+                        String winner = kaipai();
+                        sendInfo("kaipai:" + winner);
+                        authcController.settleAccounts(winner.trim());
                         return;
                     }
                     String msg = username + ": " + split[1];
@@ -201,19 +217,21 @@ public class WebSocketServer {
 
                 } else {//给特定人员发消息
                     String user = split[0].substring(1);
-                        if (!StringUtils.isEmpty(user.trim())) {
-                            if ("kanpai".equals(split[1])) {//如果是某人要看牌,就从list里把他的牌挑出来给前台
-                                for (Player p : list) {
-                                    if (p.getName().equals(user)) {
-                                        //后台记住这个人看牌了
-                                        kanpaiusers.put(user.trim(), true);
-                                        sendMessageToSomeBody(user.trim(), "kanpai#" + p.getPlayerCards().toString());
-                                    }
+                    if (!StringUtils.isEmpty(user.trim())) {
+                        if ("kanpai".equals(split[1])) {//如果是某人要看牌,就从list里把他的牌挑出来给前台
+                            for (Player p : list) {
+                                if (p.getName().equals(user)) {
+                                    //后台记住这个人看牌了
+                                    kanpaiusers.put(user.trim(), true);
+                                    sendMessageToSomeBody(user.trim(), "kanpai#" + p.getPlayerCards().toString());
                                 }
                             }
-
-
+                        } else if ("timeisup".equals(split[1])) {//如果是某人要看牌,就从list里把他的牌挑出来给前台
+                            sendMessageToSomeBody(user.trim(), "timeisup#" + user.trim());
                         }
+
+
+                    }
 
                 }
             } else {
@@ -225,7 +243,7 @@ public class WebSocketServer {
     }
 
     private int judgePlayersCount() {
-        int nowCount=0;
+        int nowCount = 0;
         for (String player : tempNameList) {
             if (!StringUtils.isEmpty(player)) nowCount++;
         }
@@ -252,13 +270,14 @@ public class WebSocketServer {
 
     /**
      * 所有人把牌全丢了,那最后一个人直接赢
+     *
      * @return
      */
     private String kaipai2() {
-        String finalWinnerName="";
+        String finalWinnerName = "";
         try {
             for (String name : tempNameList) {
-                if (!StringUtils.isEmpty(name)){
+                if (!StringUtils.isEmpty(name)) {
                     finalWinnerName = name;
                     break;
                 }
@@ -297,23 +316,23 @@ public class WebSocketServer {
         for (String key : redisUtil.keys("*")) {
             map.put(key, (List<Integer>) redisUtil.get(key));
         }
-        sendInfo(nextPlayerName()+"yixiazhu" + JSON.toJSONString(map));
+        sendInfo(nextPlayerName() + "yixiazhu" + JSON.toJSONString(map));
         //并告诉下一个人要显示下注按钮了
         String nextPlayerName = nextPlayerName();
         int nextManMoney = judgeNextManMoney(money);
-        System.out.println("轮到" + nextPlayerName+ "下注了...下注金额默认为"+nextManMoney);
-        sendMessageToSomeBody(nextPlayerName, "zhunbeixia"+nextManMoney);
+        System.out.println("轮到" + nextPlayerName + "下注了...下注金额默认为" + nextManMoney);
+        sendMessageToSomeBody(nextPlayerName, "zhunbeixia" + nextManMoney);
     }
 
-    public int judgeNextManMoney(int money){
+    public int judgeNextManMoney(int money) {
         String nextPlayerName = nextPlayerName();
         //如果当前下注人没看牌
-        if (!kanpaiusers.containsKey(this.username)){
+        if (!kanpaiusers.containsKey(this.username)) {
             //下家也没看牌
             if (!kanpaiusers.containsKey(nextPlayerName)) return money;
-            else return money*2;
-        }else {
-            if (!kanpaiusers.containsKey(nextPlayerName)) return money/2;
+            else return money * 2;
+        } else {
+            if (!kanpaiusers.containsKey(nextPlayerName)) return money / 2;
             else return money;
         }
     }
@@ -324,6 +343,7 @@ public class WebSocketServer {
         arrayList.addAll(tempNameList);
         List<String> collect = arrayList.stream().filter(s -> !StringUtils.isEmpty(s)).collect(Collectors.toList());
         //防止最后一名兄弟发牌,然后一个循环的话,找不到下家
+        if (collect.isEmpty()) return "";
         return collect.get(collect.indexOf(this.username) + 1);
     }
 
@@ -364,7 +384,7 @@ public class WebSocketServer {
         Map<String, WebSocketServer> tempMap = Collections.synchronizedMap(new HashMap());
         for (String username : users.keySet()) {
             if (tempNameList.contains(username)) {
-                tempMap.put(username,users.get(username));
+                tempMap.put(username, users.get(username));
             }
         }
         for (WebSocketServer item : tempMap.values()) {

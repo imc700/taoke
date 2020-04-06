@@ -1,5 +1,6 @@
 package com.ks.jdfen.controller;
 
+import com.ks.jdfen.Entity.SysRole;
 import com.ks.jdfen.Entity.User;
 import com.ks.jdfen.dao.UserDao;
 import com.ks.jdfen.myutil.RedisUtil;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -56,6 +58,26 @@ public class AuthcController {
             }
         }
         return "SUCCESS";
+    }
+
+    @ResponseBody
+    @RequestMapping("/chongzhi")
+    public String chongzhi() {
+        Subject subject = SecurityUtils.getSubject();
+        User user = (User) subject.getSession().getAttribute("user");
+        ArrayList<String> list = new ArrayList<>();
+        for (SysRole role : user.getRoles()) {
+            list.add(role.getRole());
+        }
+        if (list.contains("admin")){
+            List<User> users = userDao.findAll();//此处可优化成只查user表而非role和permission都关联查询出来
+            for (User u : users) {
+                u.setMoney(1000);
+                userDao.save(u);
+            }
+            return "SUCCESS";
+        }
+        return "您无权此操作.";
     }
 
     /**
