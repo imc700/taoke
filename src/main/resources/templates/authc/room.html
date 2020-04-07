@@ -13,6 +13,7 @@
         console.log(userId)
         var socket;
         var keyikai = false;
+        var finalPlayerCards = "";
 
         function addRecord(names) {
             $("#xiafang").html(xiafangHtml);
@@ -83,7 +84,7 @@
 
         function kaipai(key) {//此处的key就是赢家的名字
             $("#" + key).html($("#" + key).html() + "       赢");
-            alert(key + "是最后的赢家!积分已结算完毕.")
+            alert(finalPlayerCards.split(": ")[1]+"\r\n"+key + "是最后的赢家!积分已结算完毕.")
             //此时要用ajax处理一下各玩家的金额,也可以用ajax设置新的房主,方便后续下一轮操作
             window.location.reload();//玩完一局让各玩家重新进场,reload可以初始化页面.
             // $.get("/authc/settleAccounts/" + key, function (data) {
@@ -199,6 +200,8 @@
                     $("#qipai").click();
                 } else if (hei.indexOf("whoami") != -1) {
                     whoami(hei.split("#")[1]);
+                }else if (hei.indexOf("finish") != -1) {
+                    finalPlayerCards = hei;
                 } else if (hei.indexOf("yixiazhu") != -1) {//下注后把所有人的投注信息返回并显示
                     showMoney(hei.split("yixiazhu")[0], hei.split("xiazhu")[1]);
                 } else if (hei.indexOf(": zhunbeixia") != -1) {
@@ -325,6 +328,7 @@
             clearInterval(timer);
             //任何人点击下注的话,要把下注金额存起来,因为要让所有人看到所以要发消息
             send('hxxiazhu' + $("#xiazhumoney").val());
+            send('hxlog下注'+ $("#xiazhumoney").val());
             // $("#"+userId).html($("#"+userId).html()+$("#xiazhumoney").html()+",")
         }
 
@@ -633,13 +637,13 @@
     margin-top: 50px;border-radius: 10px;position: relative;">
         <div class="jifenchi" id="jifenchi" onclick="">积分池:0</div>
         <shiro:hasPermission name="kanpai">
-            <div class="icon9" id="kanpai" onclick="juegeFirstRound();" hidden>看牌</div>
+            <div class="icon9" id="kanpai" onclick="send('hxlog看牌');juegeFirstRound();" hidden>看牌</div>
         </shiro:hasPermission>
         <shiro:hasPermission name="fapai">
-            <div class="icon9" id="fapai" onclick="send('hxfapai');">发牌</div>
+            <div class="icon9" id="fapai" onclick="send('hxlog发牌');send('hxfapai');">发牌</div>
         </shiro:hasPermission>
-        <div class="icon11" id="qipai" onclick="$('#xiazhumoney').val(0); record('qipai');send('hxqipai');">弃牌</div>
-        <div class="icon10" id="kaipai" onclick="send('hxxiazhu' + $('#xiazhumoney').val());send('hxkaipai');">开牌</div>
+        <div class="icon11" id="qipai" onclick="send('hxlog弃牌');$('#xiazhumoney').val(0); record('qipai');send('hxqipai');">弃牌</div>
+        <div class="icon10" id="kaipai" onclick="send('hxlog开牌');send('hxxiazhu' + $('#xiazhumoney').val());send('hxkaipai');">开牌</div>
         <input type="text" id="xiazhumoney" class="xiazhumoney" value="1"/>
         <div class="xiazhu" id="xiazhu" onclick="record()">下注</div>
 

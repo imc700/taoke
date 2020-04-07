@@ -17,6 +17,7 @@ import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -53,6 +54,7 @@ public class WebSocketServer {
         WebSocketServer.userDao = userDao;
     }
 
+    SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
     //静态变量，用来记录当前在线连接数。应该把它设计成线程安全的。
     private static int onlineCount = 0;
     private static ArrayList<Player> list = new ArrayList<>();
@@ -182,7 +184,6 @@ public class WebSocketServer {
                             //发牌完后让下家开始下注
                             String nextPlayerName = nextPlayerName();
                             sendMessageToSomeBody(nextPlayerName, "zhunbeixia");
-                            System.out.println("####################" + nextPlayerName);
                             //底子都下了,然后就是在前台刷新下注记录
                             Map<String, List> map = new HashMap<>();
                             for (String key : redisUtil.keys("*")) {
@@ -195,6 +196,10 @@ public class WebSocketServer {
                         }
                     } else if (split[1].contains("xiazhu")) {
                         xiazhu(split[1]);
+                        return;
+                    }else if (split[1].contains("log")) {
+                        Date date = new Date();
+                        sendInfo(format.format(date)+"      "+this.username+split[1].split("log")[1] );
                         return;
                     } else if (split[1].contains("qipai")) {//弃牌就是从temp里删掉并告诉所有前端该人已弃牌(比如把这个人面前的牌置白)
                         System.out.println(this.username+"弃牌了-------------------------------");
@@ -257,9 +262,20 @@ public class WebSocketServer {
 
     private String kaipai() {
         ArrayList<Player> nowPlayers = new ArrayList<>();
+        StringBuilder finalPlayerCards=new StringBuilder();
         for (Player p : list) {
-            if (tempNameList.contains(p.getName()))
+            if (tempNameList.contains(p.getName())){
                 nowPlayers.add(p);
+                finalPlayerCards.append(p.getName()).append(":").append(p.getPlayerCards()).append("     ");
+            }
+        }
+        finalPlayerCards.append("finish.");
+        for (Player p : nowPlayers) {
+            try {
+                sendMessageToSomeBody(p.getName().trim(), finalPlayerCards.toString());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         try {
             WinThreePoker threePoker = new WinThreePoker(nowPlayers);
@@ -403,7 +419,7 @@ public class WebSocketServer {
     }
 
     public static synchronized int getOnlineCount() {
-        return onlineCount;
+        return users.keySet().size();
     }
 
     public static synchronized void addOnlineCount() {
