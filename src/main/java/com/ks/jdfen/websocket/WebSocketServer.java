@@ -57,6 +57,7 @@ public class WebSocketServer {
     private static int onlineCount = 0;
     private static ArrayList<Player> list = new ArrayList<>();
     private static List<String> seatNameList = Arrays.asList("", "", "", "", "", "", "", "");
+    private static List<String> qipaiNameList = Arrays.asList("", "", "", "", "", "", "", "");
     private static List<String> tempNameList = Arrays.asList("", "", "", "", "", "", "", "");//从发牌时初始化这个值.这局他参与了,但是弃牌了就从temp里删掉.
     private static List<Integer> seatMoneyList = new ArrayList<>();
     //创建一个线程安全的map
@@ -227,7 +228,11 @@ public class WebSocketServer {
                                 }
                             }
                         } else if ("timeisup".equals(split[1])) {//如果是某人要看牌,就从list里把他的牌挑出来给前台
-                            sendMessageToSomeBody(user.trim(), "timeisup#" + user.trim());
+                            String qipaiUserName = user.trim();
+                            if (!qipaiNameList.contains(qipaiUserName)){
+                                qipaiNameList.set(qipaiNameList.indexOf(""), qipaiUserName);//有人弃牌了,就放进去,如果已经在里面,就不做任何操作
+                                sendMessageToSomeBody(qipaiUserName, "timeisup#" + user.trim());
+                            }
                         }
 
 
@@ -297,6 +302,7 @@ public class WebSocketServer {
         seatNameList = Arrays.asList("", "", "", "", "", "", "", "");
         tempNameList = Arrays.asList("", "", "", "", "", "", "", "");//从发牌时初始化这个值.这局他参与了,但是弃牌了就从temp里删掉.
         seatMoneyList.clear();
+        qipaiNameList = Arrays.asList("", "", "", "", "", "", "", "");
         kaipaiStatus = false;
         kanpaiusers.clear();
     }
