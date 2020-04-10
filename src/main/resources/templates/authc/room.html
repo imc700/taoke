@@ -26,7 +26,7 @@
 
         }
 
-        var personMoneyList=""
+        var personMoneyList = ""
         var timer = ""//全局定时器.下注的话,就把定时器取消
 
 
@@ -46,17 +46,17 @@
                     dingshidiv.show();
 
                     //因为要给所有人看到倒计时,但是真正弃牌的动作是某一个人.
-                    var num =30
-                    timer  = setInterval(function(){
+                    var num = 30
+                    timer = setInterval(function () {
                         dingshidiv.html(num);
                         num--;
-                        if(num<=0){
+                        if (num <= 0) {
                             //给这个人发送socket指令让他在后台弃牌
-                            send("@"+nowName+"#timeisup");
+                            send("@" + nowName + "#timeisup");
                             // alert("测试定时器清除了没有")已测试,定时器只有下注人能看到,但是实际上是给所有人都设置了定时器
                             clearInterval(timer);//不打开这句话,num就会一直继续减
                         }
-                    },1000)
+                    }, 1000)
 
                 } else divs.eq(divs.length - 1).hide();
             }
@@ -65,7 +65,7 @@
             personMoneyList = JSON.parse(jsonMoneys);
             console.log(personMoneyList)
             for (var key in personMoneyList) {
-                $("#" + key).html(key + "下注:" + personMoneyList[key]+"                     合计:"+  eval(personMoneyList[key].join("+")))
+                $("#" + key).html(key + "下注:" + personMoneyList[key] + "                     合计:" + eval(personMoneyList[key].join("+")))
             }
             //其实当前时间的积分池金额就是json里面的各数组金额之和
             $("#jifenchi").html("积分池:" + getNowAllMoney(personMoneyList))
@@ -84,7 +84,7 @@
 
         function kaipai(key) {//此处的key就是赢家的名字
             $("#" + key).html($("#" + key).html() + "       赢");
-            alert(finalPlayerCards.split(": ")[1]+"\r\n"+key + "是最后的赢家!积分已结算完毕.")
+            alert(finalPlayerCards.split(": ")[1] + "\r\n" + key + "是最后的赢家!积分已结算完毕.")
             //此时要用ajax处理一下各玩家的金额,也可以用ajax设置新的房主,方便后续下一轮操作
             window.location.reload();//玩完一局让各玩家重新进场,reload可以初始化页面.
             // $.get("/authc/settleAccounts/" + key, function (data) {
@@ -146,15 +146,15 @@
                     var dingshidiv = divs.eq(divs.length - 1)
                     dingshidiv.show();
 
-                    var num =30
-                    timer  = setInterval(function(){
+                    var num = 30
+                    timer = setInterval(function () {
                         dingshidiv.html(num);
                         num--;
-                        if(num<=0){
+                        if (num <= 0) {
                             $("#qipai").click();
                             clearInterval(timer);
                         }
-                    },1000)
+                    }, 1000)
 
                 } else divs.eq(divs.length - 1).hide();
             }
@@ -185,7 +185,7 @@
                 } else if (hei.indexOf("kanpai") != -1) {//牌面由后台传给该兄弟
                     kanpai(hei.split("#")[1]);
                     console.log("开始看牌");
-                    $("#xiazhumoney").val($("#xiazhumoney").val()/1*2);
+                    $("#xiazhumoney").val($("#xiazhumoney").val() / 1 * 2);
                 } else if (hei.indexOf("kanbianse") != -1) {
                     kanbianse(hei.split("bianse")[1], "red");
                 } else if (hei.indexOf("keyikai") != -1) {
@@ -195,12 +195,12 @@
                     kanbianse(hei.split(":")[0], "white");
                 } else if (hei.indexOf("kaipai") != -1) {
                     kaipai(hei.split(":")[1]);
-                }else if (hei.indexOf("timeisup") != -1) {
+                } else if (hei.indexOf("timeisup") != -1) {
                     // timeisupqipai(hei.split("#")[1]);
                     $("#qipai").click();
                 } else if (hei.indexOf("whoami") != -1) {
                     whoami(hei.split("#")[1]);
-                }else if (hei.indexOf("finish") != -1) {
+                } else if (hei.indexOf("finish") != -1) {
                     finalPlayerCards = hei;
                 } else if (hei.indexOf("yixiazhu") != -1) {//下注后把所有人的投注信息返回并显示
                     showMoney(hei.split("yixiazhu")[0], hei.split("xiazhu")[1]);
@@ -210,7 +210,7 @@
                     $("#qipai").toggle();
                     judgeIfShowKai();
                     //把上一个下注的人的下注金额直接放到这轮下注的人的下注框里
-                    $("#xiazhumoney").val(hei.split("zhunbeixia")[1]+"");
+                    $("#xiazhumoney").val(hei.split("zhunbeixia")[1] + "");
                     //此时接到消息的人就是应该要进行定时器的人
                     // setNextPlayerInterval(hei.split("zhunbeixia")[0]+"");
                     beforeXiazhuMoney = $("#xiazhumoney").val();
@@ -314,9 +314,9 @@
 
         function record(caozuo) {
             if (caozuo != "qipai") {
-                beforeXiazhuMoney = beforeXiazhuMoney*1
-                var xiazhuMoney = $("#xiazhumoney").val()*1;
-                if (xiazhuMoney<beforeXiazhuMoney){
+                beforeXiazhuMoney = beforeXiazhuMoney * 1
+                var xiazhuMoney = $("#xiazhumoney").val() * 1;
+                if (xiazhuMoney < beforeXiazhuMoney) {
                     alert("下注金额不符合规则.");
                     return;
                 }
@@ -328,20 +328,20 @@
             clearInterval(timer);
             //任何人点击下注的话,要把下注金额存起来,因为要让所有人看到所以要发消息
             send('hxxiazhu' + $("#xiazhumoney").val());
-            send('hxlog下注'+ $("#xiazhumoney").val());
+            send('hxlog下注' + $("#xiazhumoney").val());
             // $("#"+userId).html($("#"+userId).html()+$("#xiazhumoney").html()+",")
         }
 
-        function juegeFirstRound(){
-            beforeXiazhuMoney = beforeXiazhuMoney*1;
-            console.log($("#"+(userId+"").trim()).html())
+        function juegeFirstRound() {
+            beforeXiazhuMoney = beforeXiazhuMoney * 1;
+            console.log($("#" + (userId + "").trim()).html())
             // if(!$("#"+(userId+"").trim()).html().indexOf(",")!=-1){//下注框里没逗号,说明是第一轮,则四倍
-            if(personMoneyList[userId.trim()].length==1){//下注框里没逗号,说明是第一轮,则四倍
+            if (personMoneyList[userId.trim()].length == 1) {//下注框里没逗号,说明是第一轮,则四倍
                 // $("#xiazhumoney").val(beforeXiazhuMoney*4);
                 alert("下个底子就想看牌,那还玩个毛.亲,这边建议您最少也要下注一轮哟.")
                 return;
             }
-            send('zhiding#' +'kanpai');
+            send('zhiding#' + 'kanpai');
         }
 
         seatHtmls = []
@@ -630,103 +630,107 @@
 <input type="button" value="登录" onclick="login()" />
 </form>-->
 
-<div style="display: flex;
-    justify-content: space-between;position: relative;">
-    <div style="border: 1px solid red;
-        width: 675px;height: 300px;margin-left: 40px;
-    margin-top: 50px;border-radius: 10px;position: relative;">
-        <div class="jifenchi" id="jifenchi" onclick="">积分池:0</div>
-        <shiro:hasPermission name="kanpai">
-            <div class="icon9" id="kanpai" onclick="send('hxlog看牌');juegeFirstRound();" hidden>看牌</div>
-        </shiro:hasPermission>
-        <shiro:hasPermission name="fapai">
-            <div class="icon9" id="fapai" onclick="send('hxlog发牌');send('hxfapai');">发牌</div>
-        </shiro:hasPermission>
-        <div class="icon11" id="qipai" onclick="send('hxlog弃牌');$('#xiazhumoney').val(0); record('qipai');send('hxqipai');">弃牌</div>
-        <div class="icon10" id="kaipai" onclick="send('hxlog开牌');send('hxxiazhu' + $('#xiazhumoney').val());send('hxkaipai');">开牌</div>
-        <input type="text" id="xiazhumoney" class="xiazhumoney" value="1"/>
-        <div class="xiazhu" id="xiazhu" onclick="record()">下注</div>
 
-    </div>
-    <div class="icon1">
-        <div class="icons"></div>
-        <div class="icons" style="margin-left: 20px;"></div>
-        <div class="icons" style="margin-left: 40px;"></div>
-        <div class="icon1-timebox">30</div>
-        <!--        <div class="xiazhu" style="margin-left: 40px;"><input class="xiazhu" type="text" /><input type="button" value="下注" onclick="xiazhu()" /></div>-->
+<div style="display: flex;height: 100vh; ">
+    <div style=" flex:6;display: flex;align-items: center;">
+        <div style="display: flex;
+            justify-content: space-between;position: relative;">
+            <div style="border: 1px solid red;
+                width: 675px;height: 300px;margin-left: 40px;
+            margin-top: 50px;border-radius: 10px;position: relative;">
+                <div class="jifenchi" id="jifenchi" onclick="">积分池:0</div>
+                <shiro:hasPermission name="kanpai">
+                    <div class="icon9" id="kanpai" onclick="send('hxlog看牌');juegeFirstRound();" hidden>看牌</div>
+                </shiro:hasPermission>
+                <shiro:hasPermission name="fapai">
+                    <div class="icon9" id="fapai" onclick="send('hxlog发牌');send('hxfapai');">发牌</div>
+                </shiro:hasPermission>
+                <div class="icon11" id="qipai"
+                     onclick="send('hxlog弃牌');$('#xiazhumoney').val(0); record('qipai');send('hxqipai');">弃牌</div>
+                <div class="icon10" id="kaipai"
+                     onclick="send('hxlog开牌');send('hxxiazhu' + $('#xiazhumoney').val());send('hxkaipai');">开牌</div>
+                <input type="text" id="xiazhumoney" class="xiazhumoney" value="1" />
+                <div class="xiazhu" id="xiazhu" onclick="record()">下注</div>
 
-    </div>
-    <div class="icon2">
-        <div class="icons"></div>
-        <div class="icons" style="margin-left: 20px;"></div>
-        <div class="icons" style="margin-left: 40px;"></div>
-        <div class="icon2-timebox">30</div>
+            </div>
+            <div class="icon1">
+                <div class="icons"></div>
+                <div class="icons" style="margin-left: 20px;"></div>
+                <div class="icons" style="margin-left: 40px;"></div>
+                <div class="icon1-timebox">30</div>
+                <!--        <div class="xiazhu" style="margin-left: 40px;"><input class="xiazhu" type="text" /><input type="button" value="下注" onclick="xiazhu()" /></div>-->
 
-    </div>
-    <div class="icon3">
-        <div class="icona"></div>
-        <div class="icona" style="margin-left: 20px;"></div>
-        <div class="icona" style="margin-left: 40px;"></div>
-        <div class="icon3-timebox">30</div>
+            </div>
+            <div class="icon2">
+                <div class="icons"></div>
+                <div class="icons" style="margin-left: 20px;"></div>
+                <div class="icons" style="margin-left: 40px;"></div>
+                <div class="icon2-timebox">30</div>
 
-    </div>
-    <div class="icon4">
-        <div class="icona"></div>
-        <div class="icona" style="margin-left: 20px;"></div>
-        <div class="icona" style="margin-left: 40px;"></div>
-        <div class="icon4-timebox">30</div>
+            </div>
+            <div class="icon3">
+                <div class="icona"></div>
+                <div class="icona" style="margin-left: 20px;"></div>
+                <div class="icona" style="margin-left: 40px;"></div>
+                <div class="icon3-timebox">30</div>
 
-    </div>
-    <div class="icon5">
-        <div class="iconb"></div>
-        <div class="iconb" style="margin-top: 20px;"></div>
-        <div class="iconb" style="margin-top: 40px;"></div>
-        <div class="icon5-timebox">30</div>
+            </div>
+            <div class="icon4">
+                <div class="icona"></div>
+                <div class="icona" style="margin-left: 20px;"></div>
+                <div class="icona" style="margin-left: 40px;"></div>
+                <div class="icon4-timebox">30</div>
 
-    </div>
-    <div class="icon6">
-        <div class="iconb"></div>
-        <div class="iconb" style="margin-top: 20px;"></div>
-        <div class="iconb" style="margin-top: 40px;"></div>
-        <div class="icon6-timebox">30</div>
+            </div>
+            <div class="icon5">
+                <div class="iconb"></div>
+                <div class="iconb" style="margin-top: 20px;"></div>
+                <div class="iconb" style="margin-top: 40px;"></div>
+                <div class="icon5-timebox">30</div>
 
-    </div>
-    <div class="icon7">
-        <div class="iconc"></div>
-        <div class="iconc" style="margin-top: 20px;"></div>
-        <div class="iconc" style="margin-top: 40px;"></div>
-        <div class="icon7-timebox">30</div>
+            </div>
+            <div class="icon6">
+                <div class="iconb"></div>
+                <div class="iconb" style="margin-top: 20px;"></div>
+                <div class="iconb" style="margin-top: 40px;"></div>
+                <div class="icon6-timebox">30</div>
 
+            </div>
+            <div class="icon7">
+                <div class="iconc"></div>
+                <div class="iconc" style="margin-top: 20px;"></div>
+                <div class="iconc" style="margin-top: 40px;"></div>
+                <div class="icon7-timebox">30</div>
+
+            </div>
+            <div class="icon8">
+                <div class="iconc"></div>
+                <div class="iconc" style="margin-top: 20px;"></div>
+                <div class="iconc" style="margin-top: 40px;"></div>
+                <div class="icon8-timebox">30</div>
+
+            </div>
+
+        </div>
     </div>
-    <div class="icon8">
-        <div class="iconc"></div>
-        <div class="iconc" style="margin-top: 20px;"></div>
-        <div class="iconc" style="margin-top: 40px;"></div>
-        <div class="icon8-timebox">30</div>
+
+    <div style="flex:4 ;display: flex;flex-direction: column;justify-content: center;margin: 0 0 0 0;">
+        <div id="xiafang" style="width: 50%;">
+            <textarea id="msg" placeholder="人到齐勒冒?开炸啊..." style="height: 50px;width: 100%;"></textarea>
+            <input type="button" value="发送消息" onclick="send()">
+            <br>
+            <textarea id="history" style="width: 100%;height: 322px ; max-lines: 10"></textarea>
+        </div>
 
     </div>
 
 </div>
-<br/>
-<br/>
-<h1 id="paimian"></h1>
+
+
 <!--<br/>
 <br/>
 <input type="text" /><input type="button" value="下注" onclick="xiazhu()" />-->
-<div style="margin: 100px 20px;" id="xiafang">
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <textarea id="msg" placeholder="人到齐勒冒?开炸啊..." style="width: 675px;height: 50px"></textarea>
-    <input type="button" value="发送消息" onclick="send()">
-    <br>
-    <textarea id="history" style="width: 675px;height: 200px ; max-lines: 10"></textarea>
-</div>
+
 </body>
 
 </html>
